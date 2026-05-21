@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "755405588480",
+    "project_id": "honest-academy",
+    "storage_bucket": "honest-academy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:755405588480:android:6a07a46e86be2c2543b0e5",
+        "android_client_info": {
+          "package_name": "com.example.honset_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVLzz8KVMPu_DsJ5n63--2R1GevI8s85o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
