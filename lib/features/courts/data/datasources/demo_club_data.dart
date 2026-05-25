@@ -90,10 +90,9 @@ class DemoClubData {
     return [
       Booking(
         id: 'BK-1009',
-        userId: userId,
-        userName: demoUser.name,
         courtId: 'court-1',
         courtName: 'Court One',
+        coachId: 'coach-amira',
         coachName: 'Amira Hassan',
         startsAt: DateTime(base.year, base.month, base.day, 18),
         endsAt: DateTime(base.year, base.month, base.day, 19),
@@ -101,13 +100,13 @@ class DemoClubData {
         amount: 32,
         qrPayload: 'HONSET:BK-1009',
         createdAt: DateTime.now().subtract(const Duration(hours: 4)),
+        bookedByUserId: userId,
       ),
       Booking(
         id: 'BK-1010',
-        userId: userId,
-        userName: demoUser.name,
         courtId: 'court-2',
         courtName: 'Court Two',
+        coachId: 'coach-karim',
         coachName: 'Karim Nabil',
         startsAt: DateTime(base.year, base.month, base.day + 2, 20),
         endsAt: DateTime(base.year, base.month, base.day + 2, 21),
@@ -115,6 +114,7 @@ class DemoClubData {
         amount: 28,
         qrPayload: 'HONSET:BK-1010',
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        bookedByUserId: userId,
       ),
     ];
   }

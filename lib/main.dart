@@ -8,6 +8,7 @@ import 'package:honset_app/core/services/firebase_bootstrap.dart';
 import 'package:honset_app/features/admin/presentation/cubit/admin_cubit.dart';
 import 'package:honset_app/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:honset_app/features/booking/presentation/cubit/booking_cubit.dart';
+import 'package:honset_app/features/coaches/presentation/cubit/coaches_cubit.dart';
 import 'package:honset_app/features/courts/presentation/cubit/courts_cubit.dart';
 import 'package:honset_app/features/profile/presentation/cubit/theme_cubit.dart';
 
@@ -53,6 +54,7 @@ class _HonsetAppState extends State<HonsetApp> {
         BlocProvider<AuthCubit>.value(value: widget.authCubit),
         BlocProvider(create: (_) => getIt<CourtsCubit>()),
         BlocProvider(create: (_) => getIt<BookingCubit>()),
+        BlocProvider(create: (_) => getIt<CoachesCubit>()),
         BlocProvider(create: (_) => getIt<AdminCubit>()),
         BlocProvider<ThemeCubit>.value(value: _themeCubit),
       ],

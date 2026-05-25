@@ -10,22 +10,20 @@ class BookingCubit extends Cubit<BookingState> {
   final BookingRepository _repository;
 
   Future<void> reserve({
-    required String userId,
-    required String userName,
+    required String coachId,
+    required String coachName,
     required Court court,
     required BookingSlot slot,
-    String? phoneNumber,
-    int? playerAge,
+    String? bookedByUserId,
   }) async {
     emit(state.copyWith(status: BookingActionStatus.loading));
     try {
       final booking = await _repository.reserveSlot(
-        userId: userId,
-        userName: userName,
+        coachId: coachId,
+        coachName: coachName,
         court: court,
         slot: slot,
-        phoneNumber: phoneNumber,
-        playerAge: playerAge,
+        bookedByUserId: bookedByUserId,
       );
       emit(
         state.copyWith(

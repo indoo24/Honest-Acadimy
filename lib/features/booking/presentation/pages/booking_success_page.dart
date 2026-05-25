@@ -75,6 +75,12 @@ class _BookingSuccessPageState extends State<BookingSuccessPage>
                         '${booking.courtName} • ${booking.startsAt.readableDate}',
                       ),
                       Text(
+                        'Coach: ${booking.coachName}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      Text(
                         '${booking.startsAt.timeLabel} - ${booking.endsAt.timeLabel}',
                       ),
                       const SizedBox(height: 22),

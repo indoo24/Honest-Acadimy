@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +6,7 @@ import 'package:honset_app/config/router/app_router.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
 import 'package:honset_app/core/utils/date_time_extensions.dart';
 import 'package:honset_app/features/booking/domain/entities/booking_slot.dart';
+import 'package:honset_app/features/coaches/presentation/cubit/coaches_cubit.dart';
 import 'package:honset_app/features/courts/domain/entities/court.dart';
 import 'package:honset_app/features/courts/presentation/cubit/courts_cubit.dart';
 import 'package:honset_app/features/courts/presentation/cubit/courts_state.dart';
@@ -224,6 +226,11 @@ class _CourtCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final coaches = context.watch<CoachesCubit>().state.coaches;
+    final coachImages = {
+      for (final coach in coaches)
+        coach.id: coach.imageUrl,
+    };
     final nextAvailable = slots.where((slot) => slot.canBook).firstOrNull;
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -308,7 +315,11 @@ class _CourtCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 14),
-                  _SlotTimeline(court: court, slots: slots),
+                  _SlotTimeline(
+                    court: court,
+                    slots: slots,
+                    coachImages: coachImages,
+                  ),
                   const SizedBox(height: 14),
                   SizedBox(
                     width: double.infinity,
@@ -341,10 +352,15 @@ class _CourtCard extends StatelessWidget {
 }
 
 class _SlotTimeline extends StatelessWidget {
-  const _SlotTimeline({required this.court, required this.slots});
+  const _SlotTimeline({
+    required this.court,
+    required this.slots,
+    required this.coachImages,
+  });
 
   final Court court;
   final List<BookingSlot> slots;
+  final Map<String, String?> coachImages;
 
   @override
   Widget build(BuildContext context) {
@@ -356,14 +372,21 @@ class _SlotTimeline extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final slot = slots[index];
+          final coachLabel = slot.coachName == null
+              ? ''
+              : ' • ${slot.coachName}';
           return Tooltip(
-            message: '${slot.startsAt.timeLabel} ${slot.status.name}',
+            message: '${slot.startsAt.timeLabel} ${slot.status.name}$coachLabel',
             child: InkWell(
               borderRadius: BorderRadius.circular(8),
               onTap: slot.canBook
                   ? () => context.push(
-                      '/booking/details',
-                      extra: BookingFlowArgs(court: court, slot: slot),
+                      '/court/details',
+                      extra: CourtDetailsArgs(
+                        court: court,
+                        slots: slots,
+                        initialSlot: slot,
+                      ),
                     )
                   : null,
               child: AnimatedContainer(
@@ -383,6 +406,17 @@ class _SlotTimeline extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (slot.status == SlotStatus.reserved &&
+                          coachImages[slot.coachId]?.isNotEmpty == true)
+                        CircleAvatar(
+                          radius: 10,
+                          backgroundImage: CachedNetworkImageProvider(
+                            coachImages[slot.coachId]!,
+                          ),
+                        ),
+                      if (slot.status == SlotStatus.reserved &&
+                          coachImages[slot.coachId]?.isNotEmpty == true)
+                        const SizedBox(height: 4),
                       Text(
                         slot.startsAt.timeLabel.replaceAll(' ', ''),
                         maxLines: 1,

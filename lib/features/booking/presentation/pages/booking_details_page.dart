@@ -52,7 +52,7 @@ class BookingDetailsPage extends StatelessWidget {
           _DetailTile(
             icon: Icons.sports_rounded,
             title: 'Coach',
-            value: flow.court.coach.name,
+            value: flow.slot.coachName ?? 'Select during booking',
           ),
           _DetailTile(
             icon: Icons.payments_rounded,
@@ -66,10 +66,17 @@ class BookingDetailsPage extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           PrimaryButton(
-            label: 'Continue to confirmation',
+            label: 'Continue to coach selection',
             icon: Icons.arrow_forward_rounded,
             onPressed: flow.slot.canBook
-                ? () => context.push('/booking/confirm', extra: flow)
+                ? () => context.push(
+                      '/court/details',
+                      extra: CourtDetailsArgs(
+                        court: flow.court,
+                        slots: [flow.slot],
+                        initialSlot: flow.slot,
+                      ),
+                    )
                 : null,
           ),
         ],

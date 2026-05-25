@@ -4,10 +4,9 @@ import 'package:honset_app/features/booking/domain/entities/booking.dart';
 class BookingModel extends Booking {
   const BookingModel({
     required super.id,
-    required super.userId,
-    required super.userName,
     required super.courtId,
     required super.courtName,
+    required super.coachId,
     required super.coachName,
     required super.startsAt,
     required super.endsAt,
@@ -15,8 +14,7 @@ class BookingModel extends Booking {
     required super.amount,
     required super.qrPayload,
     required super.createdAt,
-    super.phoneNumber,
-    super.playerAge,
+    super.bookedByUserId,
   });
 
   factory BookingModel.fromFirestore(
@@ -26,10 +24,9 @@ class BookingModel extends Booking {
     final status = data['status'] as String? ?? 'pending';
     return BookingModel(
       id: doc.id,
-      userId: data['userId'] as String? ?? '',
-      userName: data['userName'] as String? ?? 'Club Member',
       courtId: data['courtId'] as String? ?? '',
       courtName: data['courtName'] as String? ?? 'Court',
+      coachId: data['coachId'] as String? ?? '',
       coachName: data['coachName'] as String? ?? 'Coach',
       startsAt: (data['startsAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       endsAt: (data['endsAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -40,25 +37,23 @@ class BookingModel extends Booking {
       amount: (data['amount'] as num?)?.toDouble() ?? 0,
       qrPayload: data['qrPayload'] as String? ?? doc.id,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      phoneNumber: data['phoneNumber'] as String?,
-      playerAge: (data['playerAge'] as num?)?.toInt(),
+      bookedByUserId:
+          data['bookedByUserId'] as String? ?? data['userId'] as String?,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'userId': userId,
-      'userName': userName,
       'courtId': courtId,
       'courtName': courtName,
+      'coachId': coachId,
       'coachName': coachName,
       'startsAt': Timestamp.fromDate(startsAt),
       'endsAt': Timestamp.fromDate(endsAt),
       'status': status.name,
       'amount': amount,
       'qrPayload': qrPayload,
-      'phoneNumber': phoneNumber,
-      'playerAge': playerAge,
+      'bookedByUserId': bookedByUserId,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': FieldValue.serverTimestamp(),
     };

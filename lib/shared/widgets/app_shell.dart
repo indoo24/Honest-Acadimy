@@ -91,7 +91,8 @@ class _ShellDestination {
 
   static List<_ShellDestination> buildList({required bool isAdmin}) {
     final allDestinations = [
-      const _ShellDestination('/home', Icons.dashboard_rounded, 'Book'),
+      const _ShellDestination('/home', Icons.dashboard_rounded, 'Home'),
+      const _ShellDestination('/coaches', Icons.sports_rounded, 'Coaches'),
       const _ShellDestination(
         '/history',
         Icons.confirmation_number_rounded,

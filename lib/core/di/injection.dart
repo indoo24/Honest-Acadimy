@@ -8,9 +8,16 @@ import 'package:honset_app/features/auth/data/repositories/auth_repository_impl.
 import 'package:honset_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:honset_app/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:honset_app/features/booking/data/datasources/firestore_booking_data_source.dart';
+import 'package:honset_app/features/booking/data/datasources/firestore_schedule_data_source.dart';
 import 'package:honset_app/features/booking/data/repositories/booking_repository_impl.dart';
+import 'package:honset_app/features/booking/data/repositories/schedule_repository_impl.dart';
 import 'package:honset_app/features/booking/domain/repositories/booking_repository.dart';
+import 'package:honset_app/features/booking/domain/repositories/schedule_repository.dart';
 import 'package:honset_app/features/booking/presentation/cubit/booking_cubit.dart';
+import 'package:honset_app/features/coaches/data/datasources/firestore_coach_data_source.dart';
+import 'package:honset_app/features/coaches/data/repositories/coach_repository_impl.dart';
+import 'package:honset_app/features/coaches/domain/repositories/coach_repository.dart';
+import 'package:honset_app/features/coaches/presentation/cubit/coaches_cubit.dart';
 import 'package:honset_app/features/courts/data/datasources/firestore_court_data_source.dart';
 import 'package:honset_app/features/courts/data/repositories/court_repository_impl.dart';
 import 'package:honset_app/features/courts/domain/repositories/court_repository.dart';
@@ -34,6 +41,8 @@ Future<void> configureDependencies() async {
     );
     getIt.registerLazySingleton(() => FirestoreCourtDataSource(firestore!));
     getIt.registerLazySingleton(() => FirestoreBookingDataSource(firestore!));
+    getIt.registerLazySingleton(() => FirestoreScheduleDataSource(firestore!));
+    getIt.registerLazySingleton(() => FirestoreCoachDataSource(firestore!));
   }
 
   getIt.registerLazySingleton<AuthRepository>(
@@ -60,14 +69,34 @@ Future<void> configureDependencies() async {
       firebaseEnabled: firebaseEnabled,
     ),
   );
+  getIt.registerLazySingleton<CoachRepository>(
+    () => CoachRepositoryImpl(
+      remoteDataSource: firebaseEnabled
+          ? getIt<FirestoreCoachDataSource>()
+          : null,
+      firebaseEnabled: firebaseEnabled,
+    ),
+  );
+  if (firebaseEnabled) {
+    getIt.registerLazySingleton<ScheduleRepository>(
+      () => ScheduleRepositoryImpl(
+        remoteDataSource: getIt<FirestoreScheduleDataSource>(),
+      ),
+    );
+  }
 
   getIt.registerFactory(() => AuthCubit(getIt<AuthRepository>())..watchAuth());
   getIt.registerFactory(
     () => CourtsCubit(getIt<CourtRepository>(), getIt<BookingRepository>()),
   );
   getIt.registerFactory(() => BookingCubit(getIt<BookingRepository>()));
+  getIt.registerFactory(() => CoachesCubit(getIt<CoachRepository>()));
   getIt.registerFactory(
-    () => AdminCubit(getIt<BookingRepository>(), getIt<CourtRepository>()),
+    () => AdminCubit(
+      getIt<BookingRepository>(),
+      getIt<CourtRepository>(),
+      getIt<CoachRepository>(),
+    ),
   );
   getIt.registerLazySingleton(ThemeCubit.new);
 }

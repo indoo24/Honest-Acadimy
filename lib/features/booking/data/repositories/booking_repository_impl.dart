@@ -37,42 +37,38 @@ class BookingRepositoryImpl implements BookingRepository {
 
   @override
   Future<Booking> reserveSlot({
-    required String userId,
-    required String userName,
+    required String coachId,
+    required String coachName,
     required Court court,
     required BookingSlot slot,
-    String? phoneNumber,
-    int? playerAge,
+    String? bookedByUserId,
   }) async {
     if (!slot.canBook) throw StateError('This slot is not available');
     if (_firebaseEnabled && _remoteDataSource != null) {
       try {
         return await _remoteDataSource.reserveSlot(
-          userId: userId,
-          userName: userName,
+          coachId: coachId,
+          coachName: coachName,
           court: court,
           slot: slot,
-          phoneNumber: phoneNumber,
-          playerAge: playerAge,
+          bookedByUserId: bookedByUserId,
         );
       } on Object {
         return _createLocalBooking(
-          userId,
-          userName,
+          coachId,
+          coachName,
           court,
           slot,
-          phoneNumber,
-          playerAge,
+          bookedByUserId,
         );
       }
     }
     return _createLocalBooking(
-      userId,
-      userName,
+      coachId,
+      coachName,
       court,
       slot,
-      phoneNumber,
-      playerAge,
+      bookedByUserId,
     );
   }
 
@@ -101,11 +97,44 @@ class BookingRepositoryImpl implements BookingRepository {
   }
 
   @override
+  Stream<List<Booking>> watchDailyBookings(DateTime date) {
+    if (_firebaseEnabled && _remoteDataSource != null) {
+      return _remoteDataSource.watchDailyBookings(date);
+    }
+    // Fallback: emit demo data as a single-event stream
+    return Stream.value(_demoDailyBookings(date));
+  }
+
+  @override
+  Future<void> confirmBooking(String bookingId) async {
+    if (_firebaseEnabled && _remoteDataSource != null) {
+      await _remoteDataSource.confirmBooking(bookingId);
+      return;
+    }
+    _updateLocalBookingStatus(bookingId, BookingStatus.confirmed);
+  }
+
+  @override
+  Future<void> rejectBooking(String bookingId) async {
+    if (_firebaseEnabled && _remoteDataSource != null) {
+      await _remoteDataSource.rejectBooking(bookingId);
+      return;
+    }
+    _updateLocalBookingStatus(bookingId, BookingStatus.cancelled);
+  }
+
+  @override
   Future<void> cancelBooking(String bookingId) async {
     if (_firebaseEnabled && _remoteDataSource != null) {
       await _remoteDataSource.cancelBooking(bookingId);
       return;
     }
+    _updateLocalBookingStatus(bookingId, BookingStatus.cancelled);
+  }
+
+  // ── helpers ──────────────────────────────────────────────────────────────
+
+  void _updateLocalBookingStatus(String bookingId, BookingStatus newStatus) {
     final index = _localBookings.indexWhere(
       (booking) => booking.id == bookingId,
     );
@@ -113,26 +142,24 @@ class BookingRepositoryImpl implements BookingRepository {
       final booking = _localBookings[index];
       _localBookings[index] = Booking(
         id: booking.id,
-        userId: booking.userId,
-        userName: booking.userName,
         courtId: booking.courtId,
         courtName: booking.courtName,
+        coachId: booking.coachId,
         coachName: booking.coachName,
         startsAt: booking.startsAt,
         endsAt: booking.endsAt,
-        status: BookingStatus.cancelled,
+        status: newStatus,
         amount: booking.amount,
         qrPayload: booking.qrPayload,
         createdAt: booking.createdAt,
-        phoneNumber: booking.phoneNumber,
-        playerAge: booking.playerAge,
+        bookedByUserId: booking.bookedByUserId,
       );
     }
   }
 
   List<BookingSlot> _mergeLocalSlots(DateTime date, String courtId) {
     final slots = DemoClubData.slotsFor(date, courtId);
-    final bookedIds = _localBookings
+    final localBookings = _localBookings
         .where(
           (booking) =>
               booking.courtId == courtId &&
@@ -141,12 +168,19 @@ class BookingRepositoryImpl implements BookingRepository {
               booking.startsAt.day == date.day &&
               booking.status != BookingStatus.cancelled,
         )
+        .toList();
+    final bookedIds = localBookings
         .map((booking) => booking.startsAt.millisecondsSinceEpoch)
         .toSet();
     return slots.map((slot) {
       if (!bookedIds.contains(slot.startsAt.millisecondsSinceEpoch)) {
         return slot;
       }
+      final booking = localBookings.firstWhere(
+        (item) =>
+            item.startsAt.millisecondsSinceEpoch ==
+            slot.startsAt.millisecondsSinceEpoch,
+      );
       return BookingSlot(
         id: slot.id,
         courtId: slot.courtId,
@@ -154,34 +188,34 @@ class BookingRepositoryImpl implements BookingRepository {
         endsAt: slot.endsAt,
         status: SlotStatus.reserved,
         bookingId: 'local',
+        coachId: booking.coachId,
+        coachName: booking.coachName,
+        bookedByUserId: booking.bookedByUserId,
       );
     }).toList();
   }
 
   Booking _createLocalBooking(
-    String userId,
-    String userName,
+    String coachId,
+    String coachName,
     Court court,
     BookingSlot slot,
-    String? phoneNumber,
-    int? playerAge,
+    String? bookedByUserId,
   ) {
     final id = 'BK-${DateTime.now().millisecondsSinceEpoch}';
     final booking = Booking(
       id: id,
-      userId: userId,
-      userName: userName,
       courtId: court.id,
       courtName: court.name,
-      coachName: court.coach.name,
+      coachId: coachId,
+      coachName: coachName,
       startsAt: slot.startsAt,
       endsAt: slot.endsAt,
-      status: BookingStatus.confirmed,
+      status: BookingStatus.pending, // starts as pending
       amount: court.hourlyRate,
       qrPayload: 'HONSET:$id:${slot.startsAt.toIso8601String()}',
       createdAt: DateTime.now(),
-      phoneNumber: phoneNumber,
-      playerAge: playerAge,
+      bookedByUserId: bookedByUserId,
     );
     _localBookings.add(booking);
     return booking;
