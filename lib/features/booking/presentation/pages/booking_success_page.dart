@@ -34,7 +34,7 @@ class _BookingSuccessPageState extends State<BookingSuccessPage>
 
   @override
   Widget build(BuildContext context) {
-    final booking = context.watch<BookingCubit>().state.latestBooking;
+    final booking = context.read<BookingCubit>().state.latestBooking;
     return Scaffold(
       appBar: AppBar(title: const Text('Booking confirmed')),
       body: Center(

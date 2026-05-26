@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:honset_app/config/router/app_router.dart';
@@ -13,7 +12,6 @@ import 'package:honset_app/features/booking/domain/repositories/schedule_reposit
 import 'package:honset_app/features/coaches/domain/entities/coach_profile.dart';
 import 'package:honset_app/features/coaches/presentation/cubit/coaches_cubit.dart';
 import 'package:honset_app/features/courts/presentation/cubit/courts_cubit.dart';
-import 'package:honset_app/shared/widgets/court_visual.dart';
 import 'package:honset_app/shared/widgets/empty_state.dart';
 
 class CourtDetailsPage extends StatefulWidget {
@@ -49,11 +47,6 @@ class _CourtDetailsPageState extends State<CourtDetailsPage> {
     }
 
     final court = args.court;
-    final coaches = context.watch<CoachesCubit>().state.coaches;
-    final coachImages = {
-      for (final coach in coaches)
-        coach.id: coach.imageUrl,
-    };
     return Scaffold(
       appBar: AppBar(title: Text(court.name)),
       body: CustomScrollView(
@@ -64,7 +57,25 @@ class _CourtDetailsPageState extends State<CourtDetailsPage> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  CourtVisual(surface: court.surface),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.squashGreen.withValues(alpha: 0.3),
+                          AppColors.clubNavy.withValues(alpha: 0.8),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.sports_tennis_rounded,
+                        size: 80,
+                        color: Colors.white24,
+                      ),
+                    ),
+                  ),
                   DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -103,19 +114,31 @@ class _CourtDetailsPageState extends State<CourtDetailsPage> {
                                     ),
                               ),
                               const SizedBox(height: 8),
+                              if (court.description != null &&
+                                  court.description!.isNotEmpty)
+                                Text(
+                                  court.description!,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.bodyLarge
+                                      ?.copyWith(
+                                    color: Colors.white.withValues(alpha: .82),
+                                  ),
+                                ),
+                              const SizedBox(height: 8),
                               Text(
-                                court.description,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyLarge
+                                '\$${court.pricePerHour.toStringAsFixed(0)} / hour',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
                                     ?.copyWith(
-                                      color: Colors.white.withValues(alpha: .82),
+                                      color: Colors.white.withValues(alpha: .9),
+                                      fontWeight: FontWeight.w900,
                                     ),
                               ),
                             ],
                           ),
                         ),
-                        _RatingPill(rating: court.coach.rating),
                       ],
                     ),
                   ),
@@ -129,12 +152,7 @@ class _CourtDetailsPageState extends State<CourtDetailsPage> {
             ),
             sliver: SliverList.list(
               children: [
-                _CoachSection(
-                  coachName: court.coach.name,
-                  specialty: court.coach.specialty,
-                  rating: court.coach.rating,
-                ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 8),
                 Text(
                   'Available time slots',
                   style: Theme.of(
@@ -156,7 +174,6 @@ class _CourtDetailsPageState extends State<CourtDetailsPage> {
                       return _ResponsiveSlotWrap(
                         slots: slots,
                         selectedSlot: _selectedSlot,
-                        coachImages: coachImages,
                         onSelected: (slot) =>
                             setState(() => _selectedSlot = slot),
                       );
@@ -166,7 +183,6 @@ class _CourtDetailsPageState extends State<CourtDetailsPage> {
                   _ResponsiveSlotWrap(
                     slots: args.slots,
                     selectedSlot: _selectedSlot,
-                    coachImages: coachImages,
                     onSelected: (slot) => setState(() => _selectedSlot = slot),
                   ),
                 const SizedBox(height: 24),
@@ -269,55 +285,68 @@ class _BookingSheetState extends State<_BookingSheet> {
         ),
         child: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
                 'Reserve court',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
+                      fontWeight: FontWeight.w900,
+                    ),
               ),
               const SizedBox(height: 6),
               Text(
                 '${widget.args.court.name} • ${widget.slot.startsAt.timeLabel}',
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '\$${widget.args.court.pricePerHour.toStringAsFixed(0)} / hour',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.squashGreen,
+                    ),
               ),
               const SizedBox(height: 16),
               BlocBuilder<CoachesCubit, CoachesState>(
                 builder: (context, state) {
                   final coaches = state.coaches;
                   if (_selectedCoach == null && coaches.isNotEmpty) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (!mounted) return;
-                      setState(() => _selectedCoach = coaches.first);
-                    });
+                    _selectedCoach = coaches.first;
                   }
-                  return DropdownButtonFormField<String>(
-                    initialValue: _selectedCoach?.id,
-                    decoration: const InputDecoration(
-                      labelText: 'Coach',
-                      prefixIcon: Icon(Icons.sports_rounded),
-                    ),
-                    items: [
-                      for (final coach in coaches)
+                  return ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 56),
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _selectedCoach?.id,
+                      decoration: const InputDecoration(
+                        labelText: 'Coach',
+                        prefixIcon: Icon(Icons.sports_rounded),
+                      ),
+                      items: [
+                        for (final coach in coaches)
                         DropdownMenuItem(
                           value: coach.id,
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               CircleAvatar(
                                 radius: 14,
                                 backgroundImage:
                                     coach.imageUrl?.isNotEmpty == true
-                                        ? CachedNetworkImageProvider(
-                                            coach.imageUrl!,
-                                          )
+                                        ? NetworkImage(coach.imageUrl!)
                                         : null,
                                 child: coach.imageUrl?.isNotEmpty == true
                                     ? null
                                     : const Icon(Icons.person, size: 14),
                               ),
                               const SizedBox(width: 10),
-                              Expanded(child: Text(coach.name)),
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: Text(
+                                  coach.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
                               Text(
                                 '${coach.yearsExperience}y',
                                 style: Theme.of(context)
@@ -328,16 +357,17 @@ class _BookingSheetState extends State<_BookingSheet> {
                             ],
                           ),
                         ),
-                    ],
-                    onChanged: state.status == CoachesStatus.loading
-                        ? null
-                        : (value) {
-                            final match = coaches.firstWhere(
-                              (coach) => coach.id == value,
-                              orElse: () => coaches.first,
-                            );
-                            setState(() => _selectedCoach = match);
-                          },
+                      ],
+                      onChanged: state.status == CoachesStatus.loading
+                          ? null
+                          : (value) {
+                              final match = coaches.firstWhere(
+                                (coach) => coach.id == value,
+                                orElse: () => coaches.first,
+                              );
+                              setState(() => _selectedCoach = match);
+                            },
+                    ),
                   );
                 },
               ),
@@ -388,81 +418,15 @@ class _BookingSheetState extends State<_BookingSheet> {
   }
 }
 
-class _CoachSection extends StatelessWidget {
-  const _CoachSection({
-    required this.coachName,
-    required this.specialty,
-    required this.rating,
-  });
-
-  final String coachName;
-  final String specialty;
-  final double rating;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: AppColors.squashGreen.withValues(alpha: .14),
-              child: const Icon(
-                Icons.person_rounded,
-                color: AppColors.squashGreen,
-              ),
-            ),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 560),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    coachName,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Senior squash coach with 8+ years of club training experience.',
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    specialty,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            _RatingPill(rating: rating),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _ResponsiveSlotWrap extends StatelessWidget {
   const _ResponsiveSlotWrap({
     required this.slots,
     required this.selectedSlot,
-    required this.coachImages,
     required this.onSelected,
   });
 
   final List<BookingSlot> slots;
   final BookingSlot? selectedSlot;
-  final Map<String, String?> coachImages;
   final ValueChanged<BookingSlot> onSelected;
 
   @override
@@ -489,7 +453,6 @@ class _ResponsiveSlotWrap extends StatelessWidget {
                 child: _SlotButton(
                   slot: slot,
                   selected: selectedSlot?.id == slot.id,
-                  coachImageUrl: coachImages[slot.coachId],
                   onTap: slot.canBook ? () => onSelected(slot) : null,
                 ),
               ),
@@ -504,13 +467,11 @@ class _SlotButton extends StatelessWidget {
   const _SlotButton({
     required this.slot,
     required this.selected,
-    required this.coachImageUrl,
     required this.onTap,
   });
 
   final BookingSlot slot;
   final bool selected;
-  final String? coachImageUrl;
   final VoidCallback? onTap;
 
   @override
@@ -536,14 +497,6 @@ class _SlotButton extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (slot.status == SlotStatus.reserved && coachImageUrl != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: CircleAvatar(
-                radius: 12,
-                backgroundImage: CachedNetworkImageProvider(coachImageUrl!),
-              ),
-            ),
           Text(
             slot.startsAt.timeLabel,
             maxLines: 1,
@@ -555,8 +508,8 @@ class _SlotButton extends StatelessWidget {
             selected
                 ? 'Selected'
                 : slot.status == SlotStatus.reserved
-                ? (slot.coachName ?? 'Reserved')
-                : slot.status.name,
+                    ? (slot.coachName ?? 'Reserved')
+                    : slot.status.name,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(
@@ -564,41 +517,6 @@ class _SlotButton extends StatelessWidget {
             ).textTheme.labelSmall?.copyWith(color: color),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _RatingPill extends StatelessWidget {
-  const _RatingPill({required this.rating});
-
-  final double rating;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.courtGold.withValues(alpha: .16),
-        borderRadius: BorderRadius.circular(99),
-        border: Border.all(color: AppColors.courtGold.withValues(alpha: .34)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.star_rounded,
-              color: AppColors.courtGold,
-              size: 18,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              rating.toStringAsFixed(1),
-              style: const TextStyle(fontWeight: FontWeight.w900),
-            ),
-          ],
-        ),
       ),
     );
   }

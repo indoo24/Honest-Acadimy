@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:honset_app/core/utils/date_time_extensions.dart';
 import 'package:honset_app/features/booking/domain/entities/booking.dart';
-import 'package:honset_app/features/coaches/domain/entities/coach_profile.dart';
-import 'package:honset_app/features/courts/domain/entities/court.dart';
 
 enum AdminStatus { initial, loading, loaded, failure }
 
@@ -9,8 +8,6 @@ class AdminState extends Equatable {
   const AdminState({
     required this.status,
     this.bookings = const [],
-    this.courts = const [],
-    this.coaches = const [],
     this.selectedDate,
     this.message,
   });
@@ -19,49 +16,56 @@ class AdminState extends Equatable {
 
   final AdminStatus status;
   final List<Booking> bookings;
-  final List<Court> courts;
-  final List<CoachProfile> coaches;
   final DateTime? selectedDate;
   final String? message;
 
-  /// Bookings grouped by courtId.
-  Map<String, List<Booking>> get bookingsByCourt {
-    final map = <String, List<Booking>>{};
-    for (final booking in bookings) {
-      map.putIfAbsent(booking.courtId, () => []).add(booking);
-    }
-    return map;
+  List<Booking> get confirmedBookings => bookings
+      .where((booking) => booking.status == BookingStatus.confirmed)
+      .toList();
+
+  List<Booking> get pendingBookings => bookings
+      .where(
+        (booking) =>
+            booking.status == BookingStatus.pending_payment ||
+            booking.status == BookingStatus.pending_payment_review,
+      )
+      .toList();
+
+  bool get hasBookings => bookings.isNotEmpty;
+
+  bool get hasPendingBookings => pendingBookings.isNotEmpty;
+
+  bool get hasConfirmedBookings => confirmedBookings.isNotEmpty;
+
+  int get pendingCount => pendingBookings.length;
+
+  int get confirmedCount => confirmedBookings.length;
+
+  String get selectedDateLabel => selectedDate == null
+      ? ''
+      : '${selectedDate!.shortDay}, ${selectedDate!.monthName} ${selectedDate!.dayNumber}';
+
+  String get selectedDateHeadline => selectedDate == null
+      ? ''
+      : '${selectedDate!.monthName} ${selectedDate!.dayNumber}';
+
+  bool isSelectedDate(DateTime date) {
+    final targetDate = selectedDate;
+    if (targetDate == null) return false;
+    return targetDate.year == date.year &&
+        targetDate.month == date.month &&
+        targetDate.day == date.day;
   }
-
-  /// Bookings grouped by coachId (excluding cancelled).
-  Map<String, List<Booking>> get bookingsByCoach {
-    final map = <String, List<Booking>>{};
-    for (final booking in bookings) {
-      if (booking.status == BookingStatus.cancelled) continue;
-      map.putIfAbsent(booking.coachId, () => []).add(booking);
-    }
-    return map;
-  }
-
-  int get pendingCount =>
-      bookings.where((b) => b.status == BookingStatus.pending).length;
-
-  int get confirmedCount =>
-      bookings.where((b) => b.status == BookingStatus.confirmed).length;
 
   AdminState copyWith({
     AdminStatus? status,
     List<Booking>? bookings,
-    List<Court>? courts,
-    List<CoachProfile>? coaches,
     DateTime? selectedDate,
     String? message,
   }) {
     return AdminState(
       status: status ?? this.status,
       bookings: bookings ?? this.bookings,
-      courts: courts ?? this.courts,
-      coaches: coaches ?? this.coaches,
       selectedDate: selectedDate ?? this.selectedDate,
       message: message,
     );
@@ -71,8 +75,6 @@ class AdminState extends Equatable {
   List<Object?> get props => [
     status,
     bookings,
-    courts,
-    coaches,
     selectedDate,
     message,
   ];

@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,12 +5,10 @@ import 'package:honset_app/config/router/app_router.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
 import 'package:honset_app/core/utils/date_time_extensions.dart';
 import 'package:honset_app/features/booking/domain/entities/booking_slot.dart';
-import 'package:honset_app/features/coaches/presentation/cubit/coaches_cubit.dart';
 import 'package:honset_app/features/courts/domain/entities/court.dart';
 import 'package:honset_app/features/courts/presentation/cubit/courts_cubit.dart';
 import 'package:honset_app/features/courts/presentation/cubit/courts_state.dart';
 import 'package:honset_app/shared/widgets/app_logo.dart';
-import 'package:honset_app/shared/widgets/court_visual.dart';
 import 'package:honset_app/shared/widgets/error_state.dart';
 import 'package:honset_app/shared/widgets/skeleton_loader.dart';
 import 'package:honset_app/shared/widgets/status_badge.dart';
@@ -49,18 +46,18 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(width: 8),
             ],
           ),
-          body: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 260),
-            child: switch (state.status) {
-              CourtsStatus.failure => ErrorStateView(
+          body: switch (state.status) {
+            CourtsStatus.failure => ErrorStateView(
                 message: state.message ?? 'Could not load courts.',
                 onRetry: () => context.read<CourtsCubit>().loadDashboard(),
               ),
-              CourtsStatus.loading ||
-              CourtsStatus.initial => const _DashboardSkeleton(),
-              CourtsStatus.loaded => _DashboardContent(state: state),
-            },
-          ),
+            CourtsStatus.loading ||
+            CourtsStatus.initial => const _DashboardSkeleton(),
+            CourtsStatus.loaded => _DashboardContent(
+                key: ValueKey('content-${state.courts.length}'),
+                state: state,
+              ),
+          },
         );
       },
     );
@@ -68,7 +65,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class _DashboardContent extends StatelessWidget {
-  const _DashboardContent({required this.state});
+  const _DashboardContent({super.key, required this.state});
 
   final CourtsState state;
 
@@ -90,7 +87,7 @@ class _DashboardContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Live availability across both squash courts.',
+                  'Live availability across all squash courts.',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 18),
@@ -169,8 +166,7 @@ class _DateStrip extends StatelessWidget {
           return InkWell(
             borderRadius: BorderRadius.circular(8),
             onTap: () => context.read<CourtsCubit>().loadDashboard(date: day),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
+            child: Container(
               width: 68,
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -226,11 +222,6 @@ class _CourtCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final coaches = context.watch<CoachesCubit>().state.coaches;
-    final coachImages = {
-      for (final coach in coaches)
-        coach.id: coach.imageUrl,
-    };
     final nextAvailable = slots.where((slot) => slot.canBook).firstOrNull;
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -247,7 +238,25 @@ class _CourtCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  CourtVisual(surface: court.surface),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.squashGreen.withValues(alpha: 0.3),
+                          AppColors.clubNavy.withValues(alpha: 0.6),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.sports_tennis_rounded,
+                        size: 64,
+                        color: Colors.white38,
+                      ),
+                    ),
+                  ),
                   Positioned(
                     left: 16,
                     top: 16,
@@ -271,7 +280,7 @@ class _CourtCard extends StatelessWidget {
                           vertical: 8,
                         ),
                         child: Text(
-                          '\$${court.hourlyRate.toStringAsFixed(0)} / hour',
+                          '\$${court.pricePerHour.toStringAsFixed(0)} / hour',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,
@@ -288,37 +297,25 @@ class _CourtCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          court.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.w900),
-                        ),
-                      ),
-                      const Icon(
-                        Icons.star_rounded,
-                        color: AppColors.courtGold,
-                        size: 20,
-                      ),
-                      Text(court.coach.rating.toStringAsFixed(1)),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
                   Text(
-                    '${court.coach.name} - ${court.coach.specialty}',
+                    court.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: Theme.of(context).textTheme.titleLarge
+                        ?.copyWith(fontWeight: FontWeight.w900),
                   ),
+                  const SizedBox(height: 6),
+                  if (court.description != null && court.description!.isNotEmpty)
+                    Text(
+                      court.description!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   const SizedBox(height: 14),
                   _SlotTimeline(
                     court: court,
                     slots: slots,
-                    coachImages: coachImages,
                   ),
                   const SizedBox(height: 14),
                   SizedBox(
@@ -355,12 +352,10 @@ class _SlotTimeline extends StatelessWidget {
   const _SlotTimeline({
     required this.court,
     required this.slots,
-    required this.coachImages,
   });
 
   final Court court;
   final List<BookingSlot> slots;
-  final Map<String, String?> coachImages;
 
   @override
   Widget build(BuildContext context) {
@@ -389,8 +384,7 @@ class _SlotTimeline extends StatelessWidget {
                       ),
                     )
                   : null,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
+              child: Container(
                 width: 72,
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
@@ -406,17 +400,6 @@ class _SlotTimeline extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (slot.status == SlotStatus.reserved &&
-                          coachImages[slot.coachId]?.isNotEmpty == true)
-                        CircleAvatar(
-                          radius: 10,
-                          backgroundImage: CachedNetworkImageProvider(
-                            coachImages[slot.coachId]!,
-                          ),
-                        ),
-                      if (slot.status == SlotStatus.reserved &&
-                          coachImages[slot.coachId]?.isNotEmpty == true)
-                        const SizedBox(height: 4),
                       Text(
                         slot.startsAt.timeLabel.replaceAll(' ', ''),
                         maxLines: 1,

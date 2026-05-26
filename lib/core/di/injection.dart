@@ -30,60 +30,47 @@ Future<void> configureDependencies() async {
   if (getIt.isRegistered<AuthRepository>()) return;
 
   final firebaseEnabled = FirebaseBootstrap.isConfigured;
-  FirebaseFirestore? firestore;
-  FirebaseAuth? auth;
 
-  if (firebaseEnabled) {
-    firestore = FirebaseFirestore.instance;
-    auth = FirebaseAuth.instance;
-    getIt.registerLazySingleton(
-      () => FirebaseAuthDataSource(auth!, firestore!),
+  if (!firebaseEnabled) {
+    throw StateError(
+      'Firebase is not configured. The app requires Firebase to run.',
     );
-    getIt.registerLazySingleton(() => FirestoreCourtDataSource(firestore!));
-    getIt.registerLazySingleton(() => FirestoreBookingDataSource(firestore!));
-    getIt.registerLazySingleton(() => FirestoreScheduleDataSource(firestore!));
-    getIt.registerLazySingleton(() => FirestoreCoachDataSource(firestore!));
   }
+
+  final firestore = FirebaseFirestore.instance;
+  final auth = FirebaseAuth.instance;
+
+  getIt.registerLazySingleton(() => FirebaseAuthDataSource(auth, firestore));
+  getIt.registerLazySingleton(() => FirestoreCourtDataSource(firestore));
+  getIt.registerLazySingleton(() => FirestoreBookingDataSource(firestore));
+  getIt.registerLazySingleton(() => FirestoreScheduleDataSource(firestore));
+  getIt.registerLazySingleton(() => FirestoreCoachDataSource(firestore));
 
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
-      remoteDataSource: firebaseEnabled
-          ? getIt<FirebaseAuthDataSource>()
-          : null,
-      firebaseEnabled: firebaseEnabled,
+      remoteDataSource: getIt<FirebaseAuthDataSource>(),
     ),
   );
   getIt.registerLazySingleton<CourtRepository>(
     () => CourtRepositoryImpl(
-      remoteDataSource: firebaseEnabled
-          ? getIt<FirestoreCourtDataSource>()
-          : null,
-      firebaseEnabled: firebaseEnabled,
+      remoteDataSource: getIt<FirestoreCourtDataSource>(),
     ),
   );
   getIt.registerLazySingleton<BookingRepository>(
     () => BookingRepositoryImpl(
-      remoteDataSource: firebaseEnabled
-          ? getIt<FirestoreBookingDataSource>()
-          : null,
-      firebaseEnabled: firebaseEnabled,
+      remoteDataSource: getIt<FirestoreBookingDataSource>(),
     ),
   );
   getIt.registerLazySingleton<CoachRepository>(
     () => CoachRepositoryImpl(
-      remoteDataSource: firebaseEnabled
-          ? getIt<FirestoreCoachDataSource>()
-          : null,
-      firebaseEnabled: firebaseEnabled,
+      remoteDataSource: getIt<FirestoreCoachDataSource>(),
     ),
   );
-  if (firebaseEnabled) {
-    getIt.registerLazySingleton<ScheduleRepository>(
-      () => ScheduleRepositoryImpl(
-        remoteDataSource: getIt<FirestoreScheduleDataSource>(),
-      ),
-    );
-  }
+  getIt.registerLazySingleton<ScheduleRepository>(
+    () => ScheduleRepositoryImpl(
+      remoteDataSource: getIt<FirestoreScheduleDataSource>(),
+    ),
+  );
 
   getIt.registerFactory(() => AuthCubit(getIt<AuthRepository>())..watchAuth());
   getIt.registerFactory(
@@ -91,12 +78,6 @@ Future<void> configureDependencies() async {
   );
   getIt.registerFactory(() => BookingCubit(getIt<BookingRepository>()));
   getIt.registerFactory(() => CoachesCubit(getIt<CoachRepository>()));
-  getIt.registerFactory(
-    () => AdminCubit(
-      getIt<BookingRepository>(),
-      getIt<CourtRepository>(),
-      getIt<CoachRepository>(),
-    ),
-  );
+  getIt.registerFactory(() => AdminCubit(getIt<BookingRepository>()));
   getIt.registerLazySingleton(ThemeCubit.new);
 }

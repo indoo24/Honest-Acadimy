@@ -82,7 +82,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       _SummaryRow(label: 'Date', value: flow.slot.startsAt.readableDate),
                       _SummaryRow(
                         label: 'Total',
-                        value: '\$${flow.court.hourlyRate.toStringAsFixed(0)}',
+                        value: '\$${flow.court.pricePerHour.toStringAsFixed(0)}',
                       ),
                     ],
                   ),
@@ -105,6 +105,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                         DropdownMenuItem(
                           value: coach.id,
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               CircleAvatar(
                                 radius: 14,
@@ -119,7 +120,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                     : const Icon(Icons.person, size: 14),
                               ),
                               const SizedBox(width: 10),
-                              Expanded(child: Text(coach.name)),
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: Text(
+                                  coach.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
                               Text(
                                 '${coach.yearsExperience}y',
                                 style: Theme.of(context)

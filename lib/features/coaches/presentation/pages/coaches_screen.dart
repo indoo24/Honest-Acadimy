@@ -66,6 +66,7 @@ class _CoachesScreenState extends State<CoachesScreen> {
               );
               if (!isGrid) {
                 return ListView.separated(
+                  key: const ValueKey('coach-list'),
                   padding: padding,
                   itemCount: state.coaches.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 16),
@@ -80,6 +81,7 @@ class _CoachesScreenState extends State<CoachesScreen> {
                       (columns - 1) * 16) /
                   columns;
               return GridView.builder(
+                key: const ValueKey('coach-grid'),
                 padding: padding,
                 itemCount: state.coaches.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -116,111 +118,97 @@ class _CoachCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 240),
-      curve: Curves.easeOut,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: .08),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                AspectRatio(
-                  aspectRatio: 16 / 10,
-                  child: Hero(
-                    tag: 'coach-image-${coach.id}',
-                    child: CachedNetworkImage(
-                      imageUrl: coach.imageUrl ?? '',
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: AppColors.clubNavy.withValues(alpha: .08),
-                        child: const Center(
-                          child: Icon(Icons.person_rounded, size: 42),
-                        ),
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              AspectRatio(
+                aspectRatio: 16 / 10,
+                child: Hero(
+                  tag: 'coach-image-${coach.id}',
+                  child: CachedNetworkImage(
+                    imageUrl: coach.imageUrl ?? '',
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      color: AppColors.clubNavy.withValues(alpha: .08),
+                      child: const Center(
+                        child: Icon(Icons.person_rounded, size: 42),
                       ),
-                      errorWidget: (context, url, error) => Container(
-                        color: AppColors.clubNavy.withValues(alpha: .08),
-                        child: const Center(
-                          child: Icon(Icons.person_rounded, size: 42),
-                        ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      color: AppColors.clubNavy.withValues(alpha: .08),
+                      child: const Center(
+                        child: Icon(Icons.person_rounded, size: 42),
                       ),
                     ),
                   ),
                 ),
-                Positioned(
-                  right: 12,
-                  top: 12,
-                  child: _AvailabilityPill(isActive: coach.isActive),
+              ),
+              Positioned(
+                right: 12,
+                top: 12,
+                child: _AvailabilityPill(isActive: coach.isActive),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  coach.name,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  coach.specialty,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.squashGreen,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  coach.description ?? coach.bio,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    _MetaChip(
+                      icon: Icons.timer_outlined,
+                      label: '${coach.yearsExperience} yrs',
+                    ),
+                    const SizedBox(width: 8),
+                    _MetaChip(
+                      icon: Icons.star_rounded,
+                      label: coach.rating.toStringAsFixed(1),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: onViewProfile,
+                    icon: const Icon(Icons.visibility_rounded),
+                    label: const Text('View profile'),
+                  ),
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    coach.name,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    coach.specialty,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.squashGreen,
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    coach.description ?? coach.bio,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      _MetaChip(
-                        icon: Icons.timer_outlined,
-                        label: '${coach.yearsExperience} yrs',
-                      ),
-                      const SizedBox(width: 8),
-                      _MetaChip(
-                        icon: Icons.star_rounded,
-                        label: coach.rating.toStringAsFixed(1),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: onViewProfile,
-                      icon: const Icon(Icons.visibility_rounded),
-                      label: const Text('View profile'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

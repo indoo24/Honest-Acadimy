@@ -7,7 +7,7 @@ class StatusBadge extends StatelessWidget {
   const StatusBadge.slot(this.slotStatus, {super.key}) : bookingStatus = null;
 
   const StatusBadge.booking(this.bookingStatus, {super.key})
-    : slotStatus = null;
+      : slotStatus = null;
 
   final SlotStatus? slotStatus;
   final BookingStatus? bookingStatus;
@@ -25,16 +25,26 @@ class StatusBadge extends StatelessWidget {
       child: Text(
         _label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w800,
-        ),
+              color: color,
+              fontWeight: FontWeight.w800,
+            ),
       ),
     );
   }
 
   String get _label {
     if (slotStatus != null) return slotStatus!.name.toUpperCase();
-    return bookingStatus!.name.toUpperCase();
+    return _bookingLabel;
+  }
+
+  String get _bookingLabel {
+    return switch (bookingStatus!) {
+      BookingStatus.pending_payment => 'PENDING PAYMENT',
+      BookingStatus.pending_payment_review => 'PAYMENT REVIEW',
+      BookingStatus.confirmed => 'CONFIRMED',
+      BookingStatus.rejected => 'REJECTED',
+      BookingStatus.cancelled => 'CANCELLED',
+    };
   }
 
   Color get _color {
@@ -53,12 +63,14 @@ class StatusBadge extends StatelessWidget {
     switch (bookingStatus) {
       case BookingStatus.confirmed:
         return AppColors.squashGreen;
-      case BookingStatus.pending:
+      case BookingStatus.pending_payment:
         return AppColors.rallyOrange;
-      case BookingStatus.cancelled:
+      case BookingStatus.pending_payment_review:
+        return Colors.deepOrange;
+      case BookingStatus.rejected:
         return AppColors.dangerRed;
-      case BookingStatus.completed:
-        return Colors.blueGrey;
+      case BookingStatus.cancelled:
+        return Colors.grey;
       case null:
         return Colors.grey;
     }

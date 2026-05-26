@@ -36,7 +36,8 @@ class BookingDetailsPage extends StatelessWidget {
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 8),
-          Text(flow.court.description),
+          if (flow.court.description != null)
+            Text(flow.court.description!),
           const SizedBox(height: 20),
           _DetailTile(
             icon: Icons.calendar_today_rounded,
@@ -57,7 +58,7 @@ class BookingDetailsPage extends StatelessWidget {
           _DetailTile(
             icon: Icons.payments_rounded,
             title: 'Court fee',
-            value: '\$${flow.court.hourlyRate.toStringAsFixed(0)}',
+            value: '\$${flow.court.pricePerHour.toStringAsFixed(0)}',
           ),
           const SizedBox(height: 12),
           Align(
