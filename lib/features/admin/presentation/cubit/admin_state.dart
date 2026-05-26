@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:honset_app/core/utils/date_time_extensions.dart';
 import 'package:honset_app/features/booking/domain/entities/booking.dart';
-import 'package:honset_app/features/courts/domain/entities/court.dart';
 
 enum AdminStatus { initial, loading, loaded, failure }
 
@@ -8,7 +8,7 @@ class AdminState extends Equatable {
   const AdminState({
     required this.status,
     this.bookings = const [],
-    this.courts = const [],
+    this.selectedDate,
     this.message,
   });
 
@@ -16,31 +16,66 @@ class AdminState extends Equatable {
 
   final AdminStatus status;
   final List<Booking> bookings;
-  final List<Court> courts;
+  final DateTime? selectedDate;
   final String? message;
 
-  double get revenue => bookings
-      .where((booking) => booking.status != BookingStatus.cancelled)
-      .fold(0, (total, booking) => total + booking.amount);
-
-  int get confirmedCount => bookings
+  List<Booking> get confirmedBookings => bookings
       .where((booking) => booking.status == BookingStatus.confirmed)
-      .length;
+      .toList();
+
+  List<Booking> get pendingBookings => bookings
+      .where(
+        (booking) =>
+            booking.status == BookingStatus.pending_payment ||
+            booking.status == BookingStatus.pending_payment_review,
+      )
+      .toList();
+
+  bool get hasBookings => bookings.isNotEmpty;
+
+  bool get hasPendingBookings => pendingBookings.isNotEmpty;
+
+  bool get hasConfirmedBookings => confirmedBookings.isNotEmpty;
+
+  int get pendingCount => pendingBookings.length;
+
+  int get confirmedCount => confirmedBookings.length;
+
+  String get selectedDateLabel => selectedDate == null
+      ? ''
+      : '${selectedDate!.shortDay}, ${selectedDate!.monthName} ${selectedDate!.dayNumber}';
+
+  String get selectedDateHeadline => selectedDate == null
+      ? ''
+      : '${selectedDate!.monthName} ${selectedDate!.dayNumber}';
+
+  bool isSelectedDate(DateTime date) {
+    final targetDate = selectedDate;
+    if (targetDate == null) return false;
+    return targetDate.year == date.year &&
+        targetDate.month == date.month &&
+        targetDate.day == date.day;
+  }
 
   AdminState copyWith({
     AdminStatus? status,
     List<Booking>? bookings,
-    List<Court>? courts,
+    DateTime? selectedDate,
     String? message,
   }) {
     return AdminState(
       status: status ?? this.status,
       bookings: bookings ?? this.bookings,
-      courts: courts ?? this.courts,
+      selectedDate: selectedDate ?? this.selectedDate,
       message: message,
     );
   }
 
   @override
-  List<Object?> get props => [status, bookings, courts, message];
+  List<Object?> get props => [
+    status,
+    bookings,
+    selectedDate,
+    message,
+  ];
 }

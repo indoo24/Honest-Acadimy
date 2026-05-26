@@ -1,63 +1,71 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/core/utils/date_time_extensions.dart';
 import 'package:honset_app/features/admin/presentation/cubit/admin_state.dart';
-import 'package:honset_app/features/booking/domain/entities/booking_slot.dart';
+import 'package:honset_app/features/booking/domain/entities/booking.dart';
 import 'package:honset_app/features/booking/domain/repositories/booking_repository.dart';
-import 'package:honset_app/features/courts/domain/repositories/court_repository.dart';
 
 class AdminCubit extends Cubit<AdminState> {
-  AdminCubit(this._bookingRepository, this._courtRepository)
-    : super(const AdminState.initial());
+  AdminCubit(this._bookingRepository) : super(const AdminState.initial());
 
   final BookingRepository _bookingRepository;
-  final CourtRepository _courtRepository;
+
+  StreamSubscription<List<Booking>>? _bookingSubscription;
 
   Future<void> loadDailyOverview({DateTime? date}) async {
-    emit(state.copyWith(status: AdminStatus.loading));
+    final targetDate = (date ?? state.selectedDate ?? DateTime.now()).dateOnly;
+    emit(
+      state.copyWith(
+        status: AdminStatus.loading,
+        selectedDate: targetDate,
+        message: null,
+      ),
+    );
+
     try {
-      final courts = await _courtRepository.getCourts();
-      final bookings = await _bookingRepository.getDailyBookings(
-        date ?? DateTime.now(),
+      await _bookingSubscription?.cancel();
+      _bookingSubscription = _bookingRepository.watchDailyBookings(targetDate).listen(
+        (bookings) {
+          if (!isClosed) {
+            emit(
+              state.copyWith(
+                status: AdminStatus.loaded,
+                bookings: bookings,
+                selectedDate: targetDate,
+                message: null,
+              ),
+            );
+          }
+        },
+        onError: (Object error) {
+          if (!isClosed) {
+            emit(
+              state.copyWith(
+                status: AdminStatus.failure,
+                message: error.toString(),
+              ),
+            );
+          }
+        },
       );
+    } on Object catch (error) {
       emit(
         state.copyWith(
-          status: AdminStatus.loaded,
-          bookings: bookings,
-          courts: courts,
+          status: AdminStatus.failure,
+          message: error.toString(),
         ),
       );
-    } on Object catch (error) {
-      emit(
-        state.copyWith(status: AdminStatus.failure, message: error.toString()),
-      );
     }
   }
 
-  Future<void> addManualBooking({
-    required String courtId,
-    required String memberName,
-    required DateTime date,
-    required int hour,
-  }) async {
-    emit(state.copyWith(status: AdminStatus.loading));
+  Future<void> selectDate(DateTime date) {
+    return loadDailyOverview(date: date);
+  }
+
+  Future<void> confirmBooking(String bookingId) async {
     try {
-      final court = await _courtRepository.getCourtById(courtId);
-      final slots = await _bookingRepository.getSlots(
-        date: date,
-        courtId: courtId,
-      );
-      final slot = slots.firstWhere(
-        (item) =>
-            item.startsAt.hour == hour && item.status == SlotStatus.available,
-      );
-      await _bookingRepository.reserveSlot(
-        userId: 'admin-manual-${memberName.hashCode}',
-        userName: memberName.trim().isEmpty
-            ? 'Walk-in Member'
-            : memberName.trim(),
-        court: court,
-        slot: slot,
-      );
-      await loadDailyOverview(date: date);
+      await _bookingRepository.confirmBooking(bookingId);
     } on Object catch (error) {
       emit(
         state.copyWith(status: AdminStatus.failure, message: error.toString()),
@@ -65,8 +73,19 @@ class AdminCubit extends Cubit<AdminState> {
     }
   }
 
-  Future<void> cancelBooking(String bookingId) async {
-    await _bookingRepository.cancelBooking(bookingId);
-    await loadDailyOverview();
+  Future<void> rejectBooking(String bookingId) async {
+    try {
+      await _bookingRepository.rejectBooking(bookingId);
+    } on Object catch (error) {
+      emit(
+        state.copyWith(status: AdminStatus.failure, message: error.toString()),
+      );
+    }
+  }
+
+  @override
+  Future<void> close() async {
+    await _bookingSubscription?.cancel();
+    return super.close();
   }
 }

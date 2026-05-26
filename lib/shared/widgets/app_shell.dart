@@ -11,17 +11,32 @@ class AppShell extends StatelessWidget {
   final String location;
   final Widget child;
 
+  static final List<_ShellDestination> _allDestinations = [
+    const _ShellDestination('/home', Icons.dashboard_rounded, 'Home'),
+    const _ShellDestination('/coaches', Icons.sports_rounded, 'Coaches'),
+    const _ShellDestination(
+      '/history',
+      Icons.confirmation_number_rounded,
+      'Bookings',
+    ),
+    const _ShellDestination(
+      '/admin',
+      Icons.admin_panel_settings_rounded,
+      'Admin',
+      adminOnly: true,
+    ),
+    const _ShellDestination('/profile', Icons.person_rounded, 'Profile'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final isAdmin = context.watch<AuthCubit>().state.user?.isAdmin ?? false;
-    if (!isAdmin && location.startsWith('/admin')) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!context.mounted) return;
-        context.go('/home');
-      });
-    }
+    final isAdmin = context.select<AuthCubit, bool>(
+      (cubit) => cubit.state.user?.isAdmin ?? false,
+    );
 
-    final destinations = _ShellDestination.buildList(isAdmin: isAdmin);
+    final destinations = _allDestinations
+        .where((item) => !item.adminOnly || isAdmin)
+        .toList(growable: false);
     final selectedIndex = destinations.indexWhere(
       (item) => location.startsWith(item.path),
     );
@@ -34,7 +49,6 @@ class AppShell extends StatelessWidget {
         children: [
           if (MediaQuery.sizeOf(context).width >= 980)
             NavigationRail(
-              key: ValueKey('rail-${destinations.length}-$isAdmin'),
               selectedIndex: safeIndex,
               extended: MediaQuery.sizeOf(context).width >= 1180,
               minExtendedWidth: 220,
@@ -54,13 +68,17 @@ class AppShell extends StatelessWidget {
                   ),
               ],
             ),
-          Expanded(child: child),
+          Expanded(
+            child: KeyedSubtree(
+              key: ValueKey('shell-child-${destinations.length}-$isAdmin'),
+              child: child,
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: MediaQuery.sizeOf(context).width >= 980
           ? null
           : NavigationBar(
-              key: ValueKey('bottom-${destinations.length}-$isAdmin'),
               selectedIndex: safeIndex,
               onDestinationSelected: (index) =>
                   context.go(destinations[index].path),
@@ -88,26 +106,4 @@ class _ShellDestination {
   final IconData icon;
   final String label;
   final bool adminOnly;
-
-  static List<_ShellDestination> buildList({required bool isAdmin}) {
-    final allDestinations = [
-      const _ShellDestination('/home', Icons.dashboard_rounded, 'Book'),
-      const _ShellDestination(
-        '/history',
-        Icons.confirmation_number_rounded,
-        'Bookings',
-      ),
-      const _ShellDestination(
-        '/admin',
-        Icons.admin_panel_settings_rounded,
-        'Admin',
-        adminOnly: true,
-      ),
-      const _ShellDestination('/profile', Icons.person_rounded, 'Profile'),
-    ];
-
-    return allDestinations
-        .where((item) => !item.adminOnly || isAdmin)
-        .toList(growable: false);
-  }
 }

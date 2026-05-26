@@ -9,17 +9,23 @@ abstract class BookingRepository {
   });
 
   Future<Booking> reserveSlot({
-    required String userId,
-    required String userName,
+    required String coachId,
+    required String coachName,
     required Court court,
     required BookingSlot slot,
-    String? phoneNumber,
-    int? playerAge,
+    String? bookedByUserId,
   });
 
   Future<List<Booking>> getUserBookings(String userId);
 
   Future<List<Booking>> getDailyBookings(DateTime date);
+
+  /// Real-time stream of all bookings for a given day.
+  Stream<List<Booking>> watchDailyBookings(DateTime date);
+
+  Future<void> confirmBooking(String bookingId);
+
+  Future<void> rejectBooking(String bookingId);
 
   Future<void> cancelBooking(String bookingId);
 }
