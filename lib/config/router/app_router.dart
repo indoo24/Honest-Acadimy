@@ -13,6 +13,9 @@ import 'package:honset_app/features/booking/presentation/pages/booking_confirmat
 import 'package:honset_app/features/booking/presentation/pages/booking_details_page.dart';
 import 'package:honset_app/features/booking/presentation/pages/booking_history_page.dart';
 import 'package:honset_app/features/booking/presentation/pages/booking_success_page.dart';
+import 'package:honset_app/features/coaches/domain/entities/coach_profile.dart';
+import 'package:honset_app/features/coaches/presentation/pages/coach_details_screen.dart';
+import 'package:honset_app/features/coaches/presentation/pages/coaches_screen.dart';
 import 'package:honset_app/features/courts/domain/entities/court.dart';
 import 'package:honset_app/features/courts/presentation/pages/court_details_page.dart';
 import 'package:honset_app/features/courts/presentation/pages/home_page.dart';
@@ -30,12 +33,21 @@ class CourtDetailsArgs {
   const CourtDetailsArgs({
     required this.court,
     required this.slots,
+    this.selectedDate,
     this.initialSlot,
   });
 
   final Court court;
   final List<BookingSlot> slots;
+  final DateTime? selectedDate;
   final BookingSlot? initialSlot;
+}
+
+class CoachDetailsArgs {
+  const CoachDetailsArgs({required this.coachId, this.coach});
+
+  final String coachId;
+  final CoachProfile? coach;
 }
 
 class AppRouter {
@@ -83,6 +95,10 @@ class AppRouter {
                 builder: (context, state) => const BookingHistoryPage(),
               ),
               GoRoute(
+                path: '/coaches',
+                builder: (context, state) => const CoachesScreen(),
+              ),
+              GoRoute(
                 path: '/admin',
                 builder: (context, state) => const AdminDashboardPage(),
               ),
@@ -116,6 +132,13 @@ class AppRouter {
           GoRoute(
             path: '/booking/success',
             builder: (context, state) => const BookingSuccessPage(),
+          ),
+          GoRoute(
+            path: '/coaches/details',
+            builder: (context, state) {
+              final args = state.extra as CoachDetailsArgs?;
+              return CoachDetailsScreen(args: args);
+            },
           ),
         ],
       );

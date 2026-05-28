@@ -9,7 +9,6 @@ import 'package:honset_app/features/courts/domain/entities/court.dart';
 import 'package:honset_app/features/courts/presentation/cubit/courts_cubit.dart';
 import 'package:honset_app/features/courts/presentation/cubit/courts_state.dart';
 import 'package:honset_app/shared/widgets/app_logo.dart';
-import 'package:honset_app/shared/widgets/court_visual.dart';
 import 'package:honset_app/shared/widgets/error_state.dart';
 import 'package:honset_app/shared/widgets/skeleton_loader.dart';
 import 'package:honset_app/shared/widgets/status_badge.dart';
@@ -47,18 +46,18 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(width: 8),
             ],
           ),
-          body: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 260),
-            child: switch (state.status) {
-              CourtsStatus.failure => ErrorStateView(
+          body: switch (state.status) {
+            CourtsStatus.failure => ErrorStateView(
                 message: state.message ?? 'Could not load courts.',
                 onRetry: () => context.read<CourtsCubit>().loadDashboard(),
               ),
-              CourtsStatus.loading ||
-              CourtsStatus.initial => const _DashboardSkeleton(),
-              CourtsStatus.loaded => _DashboardContent(state: state),
-            },
-          ),
+            CourtsStatus.loading ||
+            CourtsStatus.initial => const _DashboardSkeleton(),
+            CourtsStatus.loaded => _DashboardContent(
+                key: ValueKey('content-${state.courts.length}'),
+                state: state,
+              ),
+          },
         );
       },
     );
@@ -66,7 +65,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class _DashboardContent extends StatelessWidget {
-  const _DashboardContent({required this.state});
+  const _DashboardContent({super.key, required this.state});
 
   final CourtsState state;
 
@@ -88,7 +87,7 @@ class _DashboardContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Live availability across both squash courts.',
+                  'Live availability across all squash courts.',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 18),
@@ -113,6 +112,7 @@ class _DashboardContent extends StatelessWidget {
                       child: _CourtCard(
                         court: court,
                         slots: state.slotsByCourt[court.id] ?? const [],
+                        selectedDate: state.selectedDate,
                       ),
                     );
                   }, childCount: state.courts.length),
@@ -127,6 +127,7 @@ class _DashboardContent extends StatelessWidget {
                   return _CourtCard(
                     court: court,
                     slots: state.slotsByCourt[court.id] ?? const [],
+                    selectedDate: state.selectedDate,
                   );
                 }, childCount: state.courts.length),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -167,8 +168,7 @@ class _DateStrip extends StatelessWidget {
           return InkWell(
             borderRadius: BorderRadius.circular(8),
             onTap: () => context.read<CourtsCubit>().loadDashboard(date: day),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
+            child: Container(
               width: 68,
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -217,10 +217,15 @@ class _DateStrip extends StatelessWidget {
 }
 
 class _CourtCard extends StatelessWidget {
-  const _CourtCard({required this.court, required this.slots});
+  const _CourtCard({
+    required this.court,
+    required this.slots,
+    required this.selectedDate,
+  });
 
   final Court court;
   final List<BookingSlot> slots;
+  final DateTime selectedDate;
 
   @override
   Widget build(BuildContext context) {
@@ -240,7 +245,25 @@ class _CourtCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  CourtVisual(surface: court.surface),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.squashGreen.withValues(alpha: 0.3),
+                          AppColors.clubNavy.withValues(alpha: 0.6),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.sports_tennis_rounded,
+                        size: 64,
+                        color: Colors.white38,
+                      ),
+                    ),
+                  ),
                   Positioned(
                     left: 16,
                     top: 16,
@@ -264,7 +287,7 @@ class _CourtCard extends StatelessWidget {
                           vertical: 8,
                         ),
                         child: Text(
-                          '\$${court.hourlyRate.toStringAsFixed(0)} / hour',
+                          '\$${court.pricePerHour.toStringAsFixed(0)} / hour',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,
@@ -281,34 +304,27 @@ class _CourtCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          court.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.w900),
-                        ),
-                      ),
-                      const Icon(
-                        Icons.star_rounded,
-                        color: AppColors.courtGold,
-                        size: 20,
-                      ),
-                      Text(court.coach.rating.toStringAsFixed(1)),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
                   Text(
-                    '${court.coach.name} - ${court.coach.specialty}',
+                    court.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: Theme.of(context).textTheme.titleLarge
+                        ?.copyWith(fontWeight: FontWeight.w900),
                   ),
+                  const SizedBox(height: 6),
+                  if (court.description != null && court.description!.isNotEmpty)
+                    Text(
+                      court.description!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   const SizedBox(height: 14),
-                  _SlotTimeline(court: court, slots: slots),
+                  _SlotTimeline(
+                    court: court,
+                    slots: slots,
+                    selectedDate: selectedDate,
+                  ),
                   const SizedBox(height: 14),
                   SizedBox(
                     width: double.infinity,
@@ -318,6 +334,7 @@ class _CourtCard extends StatelessWidget {
                         extra: CourtDetailsArgs(
                           court: court,
                           slots: slots,
+                          selectedDate: selectedDate,
                           initialSlot: nextAvailable,
                         ),
                       ),
@@ -341,10 +358,15 @@ class _CourtCard extends StatelessWidget {
 }
 
 class _SlotTimeline extends StatelessWidget {
-  const _SlotTimeline({required this.court, required this.slots});
+  const _SlotTimeline({
+    required this.court,
+    required this.slots,
+    required this.selectedDate,
+  });
 
   final Court court;
   final List<BookingSlot> slots;
+  final DateTime selectedDate;
 
   @override
   Widget build(BuildContext context) {
@@ -356,18 +378,25 @@ class _SlotTimeline extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final slot = slots[index];
+          final coachLabel = slot.coachName == null
+              ? ''
+              : ' • ${slot.coachName}';
           return Tooltip(
-            message: '${slot.startsAt.timeLabel} ${slot.status.name}',
+            message: '${slot.startsAt.timeLabel} ${slot.status.name}$coachLabel',
             child: InkWell(
               borderRadius: BorderRadius.circular(8),
               onTap: slot.canBook
                   ? () => context.push(
-                      '/booking/details',
-                      extra: BookingFlowArgs(court: court, slot: slot),
+                      '/court/details',
+                      extra: CourtDetailsArgs(
+                        court: court,
+                        slots: slots,
+                        selectedDate: selectedDate,
+                        initialSlot: slot,
+                      ),
                     )
                   : null,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
+              child: Container(
                 width: 72,
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(

@@ -10,6 +10,9 @@ class BookingSlot extends Equatable {
     required this.endsAt,
     required this.status,
     this.bookingId,
+    this.coachId,
+    this.coachName,
+    this.bookedByUserId,
   });
 
   final String id;
@@ -18,9 +21,22 @@ class BookingSlot extends Equatable {
   final DateTime endsAt;
   final SlotStatus status;
   final String? bookingId;
+  final String? coachId;
+  final String? coachName;
+  final String? bookedByUserId;
 
   bool get canBook => status == SlotStatus.available;
 
   @override
-  List<Object?> get props => [id, courtId, startsAt, endsAt, status, bookingId];
+  List<Object?> get props => [
+    id,
+    courtId,
+    startsAt,
+    endsAt,
+    status,
+    bookingId,
+    coachId,
+    coachName,
+    bookedByUserId,
+  ];
 }

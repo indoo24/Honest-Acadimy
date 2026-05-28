@@ -15,7 +15,7 @@ The app runs with production-shaped demo data until Firebase is configured. To e
 - `users/{userId}`: profile, email, phone, membership tier, admin flag.
 - `admins/{adminId}`: staff metadata and operational permissions.
 - `courts/{courtId}`: court profile, surface, hourly rate, active state, embedded coach snapshot.
-- `schedules/{slotId}`: court slot with `courtId`, `startsAt`, `endsAt`, `status`, `bookingId`.
+- `courtAvailability/{availabilityId}`: per-court scheduling rules, working days, hours, breaks.
 - `bookings/{bookingId}`: reservation owner, court snapshot, coach snapshot, amount, status, QR payload.
 
 ## App structure

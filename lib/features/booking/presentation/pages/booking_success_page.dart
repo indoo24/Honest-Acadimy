@@ -34,7 +34,7 @@ class _BookingSuccessPageState extends State<BookingSuccessPage>
 
   @override
   Widget build(BuildContext context) {
-    final booking = context.watch<BookingCubit>().state.latestBooking;
+    final booking = context.read<BookingCubit>().state.latestBooking;
     return Scaffold(
       appBar: AppBar(title: const Text('Booking confirmed')),
       body: Center(
@@ -73,6 +73,12 @@ class _BookingSuccessPageState extends State<BookingSuccessPage>
                       const SizedBox(height: 8),
                       Text(
                         '${booking.courtName} • ${booking.startsAt.readableDate}',
+                      ),
+                      Text(
+                        'Coach: ${booking.coachName}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
                       ),
                       Text(
                         '${booking.startsAt.timeLabel} - ${booking.endsAt.timeLabel}',

@@ -151,7 +151,7 @@ class _AuthHero extends StatelessWidget {
           const AppLogo(size: 72, foregroundColor: Colors.white),
           const Spacer(),
           Text(
-            'Premium court access with live schedules.',
+            'Premium court access with live availability.',
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w900,

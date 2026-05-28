@@ -8,18 +8,34 @@ abstract class BookingRepository {
     required String courtId,
   });
 
+  Stream<List<BookingSlot>> watchSlots({
+    required DateTime date,
+    required String courtId,
+  });
+
+  Future<Map<String, List<BookingSlot>>> getSlotsForCourts({
+    required DateTime date,
+    required List<String> courtIds,
+  });
+
   Future<Booking> reserveSlot({
-    required String userId,
-    required String userName,
+    required String coachId,
+    required String coachName,
     required Court court,
     required BookingSlot slot,
-    String? phoneNumber,
-    int? playerAge,
+    String? bookedByUserId,
   });
 
   Future<List<Booking>> getUserBookings(String userId);
 
   Future<List<Booking>> getDailyBookings(DateTime date);
+
+  /// Real-time stream of all bookings for a given day.
+  Stream<List<Booking>> watchDailyBookings(DateTime date);
+
+  Future<void> confirmBooking(String bookingId);
+
+  Future<void> rejectBooking(String bookingId);
 
   Future<void> cancelBooking(String bookingId);
 }
