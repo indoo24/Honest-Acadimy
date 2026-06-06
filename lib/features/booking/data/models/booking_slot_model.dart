@@ -9,6 +9,9 @@ class BookingSlotModel extends BookingSlot {
     required super.endsAt,
     required super.status,
     super.bookingId,
+    super.coachId,
+    super.coachName,
+    super.bookedByUserId,
   });
 
   factory BookingSlotModel.fromFirestore(
@@ -26,6 +29,9 @@ class BookingSlotModel extends BookingSlot {
         orElse: () => SlotStatus.available,
       ),
       bookingId: data['bookingId'] as String?,
+      coachId: data['coachId'] as String?,
+      coachName: data['coachName'] as String?,
+      bookedByUserId: data['bookedByUserId'] as String?,
     );
   }
 }

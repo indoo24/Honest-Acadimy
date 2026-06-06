@@ -1,14 +1,19 @@
 import 'package:equatable/equatable.dart';
 
-enum BookingStatus { pending, confirmed, cancelled, completed }
+enum BookingStatus {
+  pending_payment,
+  pending_payment_review,
+  confirmed,
+  rejected,
+  cancelled,
+}
 
 class Booking extends Equatable {
   const Booking({
     required this.id,
-    required this.userId,
-    required this.userName,
     required this.courtId,
     required this.courtName,
+    required this.coachId,
     required this.coachName,
     required this.startsAt,
     required this.endsAt,
@@ -16,15 +21,15 @@ class Booking extends Equatable {
     required this.amount,
     required this.qrPayload,
     required this.createdAt,
-    this.phoneNumber,
-    this.playerAge,
+    this.bookedByUserId,
+    this.paymentMethod,
+    this.paymentConfirmed = false,
   });
 
   final String id;
-  final String userId;
-  final String userName;
   final String courtId;
   final String courtName;
+  final String coachId;
   final String coachName;
   final DateTime startsAt;
   final DateTime endsAt;
@@ -32,16 +37,16 @@ class Booking extends Equatable {
   final double amount;
   final String qrPayload;
   final DateTime createdAt;
-  final String? phoneNumber;
-  final int? playerAge;
+  final String? bookedByUserId;
+  final String? paymentMethod;
+  final bool paymentConfirmed;
 
   @override
   List<Object?> get props => [
     id,
-    userId,
-    userName,
     courtId,
     courtName,
+    coachId,
     coachName,
     startsAt,
     endsAt,
@@ -49,7 +54,8 @@ class Booking extends Equatable {
     amount,
     qrPayload,
     createdAt,
-    phoneNumber,
-    playerAge,
+    bookedByUserId,
+    paymentMethod,
+    paymentConfirmed,
   ];
 }

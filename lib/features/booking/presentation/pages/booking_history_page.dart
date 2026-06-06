@@ -53,7 +53,7 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                   leading: const Icon(Icons.sports_tennis_rounded),
                   title: Text(booking.courtName),
                   subtitle: Text(
-                    '${booking.startsAt.readableDate} • ${booking.startsAt.timeLabel}',
+                    '${booking.startsAt.readableDate} • ${booking.startsAt.timeLabel} • ${booking.coachName}',
                   ),
                   trailing: StatusBadge.booking(booking.status),
                 ),
