@@ -13,6 +13,7 @@ class CoachProfile extends Equatable {
     required this.isActive,
     required this.availableSlots,
     required this.assignedCourts,
+    required this.weeklyAvailability,
     this.imageUrl,
     this.description,
   });
@@ -26,6 +27,7 @@ class CoachProfile extends Equatable {
   final bool isActive;
   final List<CoachAvailabilitySlot> availableSlots;
   final List<String> assignedCourts;
+  final Map<String, WeeklyAvailabilityRange> weeklyAvailability;
   final String? imageUrl;
   final String? description;
 
@@ -42,7 +44,21 @@ class CoachProfile extends Equatable {
     isActive,
     availableSlots,
     assignedCourts,
+    weeklyAvailability,
     imageUrl,
     description,
   ];
+}
+
+class WeeklyAvailabilityRange extends Equatable {
+  const WeeklyAvailabilityRange({
+    required this.startHour,
+    required this.endHour,
+  });
+
+  final int startHour;
+  final int endHour;
+
+  @override
+  List<Object?> get props => [startHour, endHour];
 }

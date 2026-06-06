@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:honset_app/config/router/app_router.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
 import 'package:honset_app/core/utils/date_time_extensions.dart';
+import 'package:honset_app/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:honset_app/features/booking/domain/entities/booking_slot.dart';
 import 'package:honset_app/features/courts/domain/entities/court.dart';
 import 'package:honset_app/features/courts/presentation/cubit/courts_cubit.dart';
@@ -26,6 +27,11 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      final authState = context.read<AuthCubit>().state;
+      final user = authState.user;
+      debugPrint(
+        '[HOME ROLE] userId=${user?.id ?? 'anonymous'} role=${user?.role ?? 'unauthenticated'} isAdmin=${user?.isAdmin ?? false}',
+      );
       context.read<CourtsCubit>().loadDashboard();
     });
   }
@@ -48,15 +54,15 @@ class _HomePageState extends State<HomePage> {
           ),
           body: switch (state.status) {
             CourtsStatus.failure => ErrorStateView(
-                message: state.message ?? 'Could not load courts.',
-                onRetry: () => context.read<CourtsCubit>().loadDashboard(),
-              ),
+              message: state.message ?? 'Could not load courts.',
+              onRetry: () => context.read<CourtsCubit>().loadDashboard(),
+            ),
             CourtsStatus.loading ||
             CourtsStatus.initial => const _DashboardSkeleton(),
             CourtsStatus.loaded => _DashboardContent(
-                key: ValueKey('content-${state.courts.length}'),
-                state: state,
-              ),
+              key: ValueKey('content-${state.courts.length}'),
+              state: state,
+            ),
           },
         );
       },
@@ -308,11 +314,13 @@ class _CourtCard extends StatelessWidget {
                     court.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w900),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                   const SizedBox(height: 6),
-                  if (court.description != null && court.description!.isNotEmpty)
+                  if (court.description != null &&
+                      court.description!.isNotEmpty)
                     Text(
                       court.description!,
                       maxLines: 1,
@@ -382,7 +390,8 @@ class _SlotTimeline extends StatelessWidget {
               ? ''
               : ' • ${slot.coachName}';
           return Tooltip(
-            message: '${slot.startsAt.timeLabel} ${slot.status.name}$coachLabel',
+            message:
+                '${slot.startsAt.timeLabel} ${slot.status.name}$coachLabel',
             child: InkWell(
               borderRadius: BorderRadius.circular(8),
               onTap: slot.canBook
@@ -415,9 +424,7 @@ class _SlotTimeline extends StatelessWidget {
                       Text(
                         slot.startsAt.timeLabel.replaceAll(' ', ''),
                         maxLines: 1,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelMedium
+                        style: Theme.of(context).textTheme.labelMedium
                             ?.copyWith(
                               fontWeight: FontWeight.w900,
                               color: _slotColor(slot.status),

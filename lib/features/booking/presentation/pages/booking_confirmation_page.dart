@@ -23,7 +23,30 @@ class BookingConfirmationPage extends StatefulWidget {
 }
 
 class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
-  CoachProfile? _selectedCoach;
+  String? _selectedCoachId;
+
+  CoachProfile? _findCoachById(List<CoachProfile> coaches, String? coachId) {
+    if (coachId == null) return null;
+    for (final coach in coaches) {
+      if (coach.id == coachId) return coach;
+    }
+    return null;
+  }
+
+  void _reportInvalidCoachSelection({
+    required String? selectedCoachId,
+    required List<CoachProfile> coaches,
+  }) {
+    final availableIds = coaches.map((coach) => coach.id).join(', ');
+    debugPrint(
+      '[COACH SELECTION ERROR] selectedCoachId=$selectedCoachId not found in coaches=[$availableIds]',
+    );
+    assert(() {
+      throw FlutterError(
+        'Selected coach id "$selectedCoachId" is missing from dropdown data.',
+      );
+    }());
+  }
 
   @override
   void initState() {
@@ -79,10 +102,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       ),
                       const SizedBox(height: 16),
                       _SummaryRow(label: 'Court', value: flow.court.name),
-                      _SummaryRow(label: 'Date', value: flow.slot.startsAt.readableDate),
+                      _SummaryRow(
+                        label: 'Date',
+                        value: flow.slot.startsAt.readableDate,
+                      ),
                       _SummaryRow(
                         label: 'Total',
-                        value: '\$${flow.court.pricePerHour.toStringAsFixed(0)}',
+                        value:
+                            '\$${flow.court.pricePerHour.toStringAsFixed(0)}',
                       ),
                     ],
                   ),
@@ -91,11 +118,21 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
               const SizedBox(height: 16),
               BlocBuilder<CoachesCubit, CoachesState>(
                 builder: (context, state) {
-                  if (_selectedCoach == null && state.coaches.isNotEmpty) {
-                    _selectedCoach = state.coaches.first;
+                  final selectedCoach = _findCoachById(
+                    state.coaches,
+                    _selectedCoachId,
+                  );
+                  if (_selectedCoachId != null && selectedCoach == null) {
+                    _reportInvalidCoachSelection(
+                      selectedCoachId: _selectedCoachId,
+                      coaches: state.coaches,
+                    );
                   }
                   return DropdownButtonFormField<String>(
-                    initialValue: _selectedCoach?.id,
+                    key: ValueKey(
+                      'coach-dropdown-${_selectedCoachId ?? 'none'}-${state.coaches.length}',
+                    ),
+                    initialValue: selectedCoach?.id,
                     decoration: const InputDecoration(
                       labelText: 'Coach',
                       prefixIcon: Icon(Icons.sports_rounded),
@@ -111,10 +148,10 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                 radius: 14,
                                 backgroundImage:
                                     coach.imageUrl?.isNotEmpty == true
-                                        ? CachedNetworkImageProvider(
-                                            coach.imageUrl!,
-                                          )
-                                        : null,
+                                    ? CachedNetworkImageProvider(
+                                        coach.imageUrl!,
+                                      )
+                                    : null,
                                 child: coach.imageUrl?.isNotEmpty == true
                                     ? null
                                     : const Icon(Icons.person, size: 14),
@@ -130,9 +167,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                               ),
                               Text(
                                 '${coach.yearsExperience}y',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
+                                style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(fontWeight: FontWeight.w700),
                               ),
                             ],
@@ -142,12 +177,20 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                     onChanged: state.status == CoachesStatus.loading
                         ? null
                         : (value) {
-                            if (value == null) return;
-                            setState(() {
-                              _selectedCoach = state.coaches.firstWhere(
-                                (coach) => coach.id == value,
-                                orElse: () => state.coaches.first,
+                            final match = _findCoachById(state.coaches, value);
+                            if (match == null) {
+                              _reportInvalidCoachSelection(
+                                selectedCoachId: value,
+                                coaches: state.coaches,
                               );
+                              setState(() => _selectedCoachId = null);
+                              return;
+                            }
+                            debugPrint(
+                              '[COACH SELECTED]\nid=${match.id}\nname=${match.name}',
+                            );
+                            setState(() {
+                              _selectedCoachId = match.id;
                             });
                           },
                   );
@@ -158,15 +201,56 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                 label: 'Confirm reservation',
                 icon: Icons.verified_rounded,
                 isLoading: state.status == BookingActionStatus.loading,
-                onPressed: _selectedCoach == null
+                onPressed: _selectedCoachId == null
                     ? null
-                    : () => context.read<BookingCubit>().reserve(
-                      coachId: _selectedCoach!.id,
-                      coachName: _selectedCoach!.name,
-                      court: flow.court,
-                      slot: flow.slot,
-                      bookedByUserId: authUser?.id,
-                    ),
+                    : () {
+                        final coachesState = context.read<CoachesCubit>().state;
+                        final selectedCoach = _findCoachById(
+                          coachesState.coaches,
+                          _selectedCoachId,
+                        );
+                        if (selectedCoach == null) {
+                          _reportInvalidCoachSelection(
+                            selectedCoachId: _selectedCoachId,
+                            coaches: coachesState.coaches,
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Invalid coach selection. Please choose again.',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+                        if (selectedCoach.id != _selectedCoachId) {
+                          _reportInvalidCoachSelection(
+                            selectedCoachId: _selectedCoachId,
+                            coaches: coachesState.coaches,
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Coach selection mismatch. Please choose again.',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+                        debugPrint(
+                          '[COACH SELECTED]\nid=${selectedCoach.id}\nname=${selectedCoach.name}',
+                        );
+                        debugPrint(
+                          '[BOOKING CREATED]\ncoachId=${selectedCoach.id}\ncoachName=${selectedCoach.name}',
+                        );
+                        context.read<BookingCubit>().reserve(
+                          coachId: selectedCoach.id,
+                          coachName: selectedCoach.name,
+                          court: flow.court,
+                          slot: flow.slot,
+                          bookedByUserId: authUser?.id,
+                        );
+                      },
               ),
             ],
           ),

@@ -1,6 +1,7 @@
 import 'package:honset_app/features/booking/data/datasources/firestore_booking_data_source.dart';
 import 'package:honset_app/features/booking/domain/entities/booking.dart';
 import 'package:honset_app/features/booking/domain/entities/booking_slot.dart';
+import 'package:flutter/foundation.dart';
 import 'package:honset_app/features/booking/domain/repositories/booking_repository.dart';
 import 'package:honset_app/features/booking/domain/repositories/court_availability_repository.dart';
 import 'package:honset_app/features/booking/domain/usecases/generate_slots.dart';
@@ -11,9 +12,9 @@ class BookingRepositoryImpl implements BookingRepository {
     required FirestoreBookingDataSource remoteDataSource,
     required CourtAvailabilityRepository availabilityRepository,
     required SlotGenerator slotGenerator,
-  })  : _remoteDataSource = remoteDataSource,
-        _availabilityRepository = availabilityRepository,
-        _slotGenerator = slotGenerator;
+  }) : _remoteDataSource = remoteDataSource,
+       _availabilityRepository = availabilityRepository,
+       _slotGenerator = slotGenerator;
 
   final FirestoreBookingDataSource _remoteDataSource;
   final CourtAvailabilityRepository _availabilityRepository;
@@ -24,8 +25,9 @@ class BookingRepositoryImpl implements BookingRepository {
     required DateTime date,
     required String courtId,
   }) async {
-    final availability =
-        await _availabilityRepository.getAvailabilityByCourtId(courtId);
+    final availability = await _availabilityRepository.getAvailabilityByCourtId(
+      courtId,
+    );
     if (availability == null) return [];
     final bookings = await _remoteDataSource.getActiveBookingsForCourt(
       courtId: courtId,
@@ -43,8 +45,9 @@ class BookingRepositoryImpl implements BookingRepository {
     required DateTime date,
     required String courtId,
   }) async* {
-    final availability =
-        await _availabilityRepository.getAvailabilityByCourtId(courtId);
+    final availability = await _availabilityRepository.getAvailabilityByCourtId(
+      courtId,
+    );
     if (availability == null) {
       yield [];
       return;
@@ -65,19 +68,15 @@ class BookingRepositoryImpl implements BookingRepository {
     required DateTime date,
     required List<String> courtIds,
   }) async {
+    debugPrint(
+      '[HOME QUERY] BookingRepository.getSlotsForCourts() using courtAvailability only',
+    );
     if (courtIds.isEmpty) return {};
     final availabilities = await _availabilityRepository.getAllAvailabilities();
     final availabilityMap = {
       for (final availability in availabilities)
         if (availability.isActive) availability.courtId: availability,
     };
-    final bookings = await _remoteDataSource.getActiveBookingsForDay(date);
-    final bookingsByCourt = <String, List<Booking>>{};
-    for (final booking in bookings) {
-        bookingsByCourt
-          .putIfAbsent(booking.courtId, () => <Booking>[])
-          .add(booking);
-    }
 
     final slotsByCourt = <String, List<BookingSlot>>{};
     for (final courtId in courtIds) {
@@ -89,7 +88,7 @@ class BookingRepositoryImpl implements BookingRepository {
       slotsByCourt[courtId] = _slotGenerator.generate(
         date: date,
         availability: availability,
-        bookings: bookingsByCourt[courtId] ?? const [],
+        bookings: const <Booking>[],
       );
     }
     return slotsByCourt;

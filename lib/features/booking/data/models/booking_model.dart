@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:honset_app/features/booking/domain/entities/booking.dart';
 
 class BookingModel extends Booking {
@@ -24,6 +25,9 @@ class BookingModel extends Booking {
   ) {
     final data = doc.data() ?? {};
     final status = data['status'] as String? ?? 'pending_payment';
+    debugPrint(
+      '[BOOKING FIRESTORE READ]\ncoachId=${data['coachId']}\ncoachName=${data['coachName']}',
+    );
     return BookingModel(
       id: doc.id,
       courtId: data['courtId'] as String? ?? '',

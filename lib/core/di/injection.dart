@@ -47,9 +47,7 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton(() => FirestoreCoachDataSource(firestore));
 
   getIt.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(
-      remoteDataSource: getIt<FirebaseAuthDataSource>(),
-    ),
+    () => AuthRepositoryImpl(remoteDataSource: getIt<FirebaseAuthDataSource>()),
   );
   getIt.registerLazySingleton<CourtRepository>(
     () => CourtRepositoryImpl(
@@ -75,7 +73,12 @@ Future<void> configureDependencies() async {
 
   getIt.registerFactory(() => AuthCubit(getIt<AuthRepository>())..watchAuth());
   getIt.registerFactory(
-    () => CourtsCubit(getIt<CourtRepository>(), getIt<BookingRepository>()),
+    () => CourtsCubit(
+      getIt<CourtRepository>(),
+      getIt<CourtAvailabilityRepository>(),
+      getIt<CoachRepository>(),
+      getIt<SlotGenerator>(),
+    ),
   );
   getIt.registerFactory(() => BookingCubit(getIt<BookingRepository>()));
   getIt.registerFactory(() => CoachesCubit(getIt<CoachRepository>()));

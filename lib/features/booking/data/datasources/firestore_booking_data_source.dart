@@ -16,9 +16,16 @@ class FirestoreBookingDataSource {
     'pending_payment_review',
   ];
 
+  void _logBookingsQuery(String message) {
+    debugPrint('[BOOKINGS QUERY] $message');
+  }
+
   Query<Map<String, dynamic>> _adminDailyBookingsQuery(DateTime date) {
     final start = DateTime(date.year, date.month, date.day);
     final end = start.add(const Duration(days: 1));
+    _logBookingsQuery(
+      "collection('bookings').where(startsAt >= $start).where(startsAt < $end).where(status in $_activeStatuses).orderBy(startsAt)",
+    );
     return _firestore
         .collection('bookings')
         .where('startsAt', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
@@ -33,6 +40,9 @@ class FirestoreBookingDataSource {
   }) async {
     final start = DateTime(date.year, date.month, date.day);
     final end = start.add(const Duration(days: 1));
+    _logBookingsQuery(
+      "collection('bookings').where(courtId == $courtId).where(startsAt >= $start).where(startsAt < $end).where(status in $_activeStatuses).orderBy(startsAt).get()",
+    );
     final snapshot = await _firestore
         .collection('bookings')
         .where('courtId', isEqualTo: courtId)
@@ -53,6 +63,9 @@ class FirestoreBookingDataSource {
   }) {
     final start = DateTime(date.year, date.month, date.day);
     final end = start.add(const Duration(days: 1));
+    _logBookingsQuery(
+      "collection('bookings').where(courtId == $courtId).where(startsAt >= $start).where(startsAt < $end).where(status in $_activeStatuses).orderBy(startsAt).snapshots()",
+    );
     return _firestore
         .collection('bookings')
         .where('courtId', isEqualTo: courtId)
@@ -72,6 +85,9 @@ class FirestoreBookingDataSource {
   Future<List<BookingModel>> getActiveBookingsForDay(DateTime date) async {
     final start = DateTime(date.year, date.month, date.day);
     final end = start.add(const Duration(days: 1));
+    _logBookingsQuery(
+      "collection('bookings').where(startsAt >= $start).where(startsAt < $end).where(status in $_activeStatuses).orderBy(startsAt).get()",
+    );
     final snapshot = await _firestore
         .collection('bookings')
         .where('startsAt', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
@@ -112,7 +128,13 @@ class FirestoreBookingDataSource {
       bookedByUserId: bookedByUserId,
       paymentMethod: paymentMethod,
     );
+    debugPrint(
+      '[BOOKING CREATED]\ncoachId=${booking.coachId}\ncoachName=${booking.coachName}',
+    );
 
+    _logBookingsQuery(
+      "collection('bookings').where(courtId == ${court.id}).where(startsAt == ${slot.startsAt}).where(status in $_activeStatuses).limit(1).get()",
+    );
     final conflictQuery = _firestore
         .collection('bookings')
         .where('courtId', isEqualTo: court.id)
@@ -124,12 +146,20 @@ class FirestoreBookingDataSource {
       throw StateError('Slot is no longer available');
     }
     await bookingRef.set(booking.toMap());
+    final writtenSnapshot = await bookingRef.get();
+    final writtenData = writtenSnapshot.data();
+    debugPrint(
+      '[BOOKING FIRESTORE WRITE]\ncoachId=${writtenData?['coachId']}\ncoachName=${writtenData?['coachName']}',
+    );
     debugPrint('[FirestoreBookingDataSource] reserveSlot -> ${bookingRef.id}');
     return booking;
   }
 
   Future<List<BookingModel>> getUserBookings(String userId) async {
     try {
+      _logBookingsQuery(
+        "collection('bookings').where(bookedByUserId == $userId).orderBy(startsAt, desc).get()",
+      );
       final snapshot = await _firestore
           .collection('bookings')
           .where('bookedByUserId', isEqualTo: userId)
@@ -148,6 +178,9 @@ class FirestoreBookingDataSource {
     }
 
     try {
+      _logBookingsQuery(
+        "collection('bookings').where(userId == $userId).orderBy(startsAt, desc).get()",
+      );
       final snapshot = await _firestore
           .collection('bookings')
           .where('userId', isEqualTo: userId)
@@ -162,28 +195,9 @@ class FirestoreBookingDataSource {
         '[FirestoreBookingDataSource] getUserBookings via userId failed: ${e.code} ${e.message}',
       );
       debugPrint(
-        '[FirestoreBookingDataSource] Falling back to fetching all bookings and filtering in-memory',
+        '[FirestoreBookingDataSource] getUserBookings($userId) -> returning empty list',
       );
-      final allDocs = await _firestore.collection('bookings').get();
-      final matching = allDocs.docs
-          .where(
-            (doc) =>
-                doc.data()['bookedByUserId'] == userId ||
-                doc.data()['userId'] == userId,
-          )
-          .toList();
-      matching.sort(
-        (a, b) =>
-            (b.data()['startsAt'] as Timestamp?)?.toDate().compareTo(
-                  (a.data()['startsAt'] as Timestamp?)?.toDate() ??
-                      DateTime.now(),
-                ) ??
-            0,
-      );
-      debugPrint(
-        '[FirestoreBookingDataSource] getUserBookings($userId) filtered in-memory -> ${matching.length}',
-      );
-      return matching.map(BookingModel.fromFirestore).toList();
+      return const <BookingModel>[];
     }
   }
 
@@ -194,16 +208,21 @@ class FirestoreBookingDataSource {
       '[FirestoreBookingDataSource] getDailyBookings($start) -> ${snapshot.docs.length}',
     );
     if (snapshot.docs.isEmpty) {
+      _logBookingsQuery("collection('bookings').limit(1).get()");
       final anyBooking = await _firestore.collection('bookings').limit(1).get();
       if (anyBooking.docs.isEmpty) {
-        debugPrint('[FirestoreBookingDataSource] WARNING: bookings collection is EMPTY');
+        debugPrint(
+          '[FirestoreBookingDataSource] WARNING: bookings collection is EMPTY',
+        );
       } else {
         debugPrint(
           '[FirestoreBookingDataSource] INFO: bookings collection has documents, but none for date $start. '
           'Check the startsAt field values.',
         );
         final sample = anyBooking.docs.first.data();
-        debugPrint('[FirestoreBookingDataSource] Sample booking field: $sample');
+        debugPrint(
+          '[FirestoreBookingDataSource] Sample booking field: $sample',
+        );
       }
     }
     return snapshot.docs.map(BookingModel.fromFirestore).toList();
@@ -211,6 +230,9 @@ class FirestoreBookingDataSource {
 
   Stream<List<BookingModel>> watchDailyBookings(DateTime date) {
     final start = DateTime(date.year, date.month, date.day);
+    _logBookingsQuery(
+      "collection('bookings').where(startsAt >= $start).where(startsAt < ${start.add(const Duration(days: 1))}).where(status in $_activeStatuses).orderBy(startsAt).snapshots()",
+    );
     return _adminDailyBookingsQuery(date).snapshots().map((snapshot) {
       debugPrint(
         '[FirestoreBookingDataSource] watchDailyBookings -> ${snapshot.docs.length}',
@@ -225,6 +247,7 @@ class FirestoreBookingDataSource {
   }
 
   Future<void> confirmBooking(String bookingId) async {
+    _logBookingsQuery("collection('bookings').doc($bookingId).get()");
     final bookingRef = _firestore.collection('bookings').doc(bookingId);
     final bookingSnap = await bookingRef.get();
     final data = bookingSnap.data();
@@ -239,6 +262,7 @@ class FirestoreBookingDataSource {
   }
 
   Future<void> rejectBooking(String bookingId) async {
+    _logBookingsQuery("collection('bookings').doc($bookingId).get()");
     final bookingRef = _firestore.collection('bookings').doc(bookingId);
     final bookingSnap = await bookingRef.get();
     final data = bookingSnap.data();
@@ -252,6 +276,9 @@ class FirestoreBookingDataSource {
   }
 
   Future<void> cancelBooking(String bookingId) async {
+    _logBookingsQuery(
+      "collection('bookings').doc($bookingId).update(status=cancelled)",
+    );
     final bookingRef = _firestore.collection('bookings').doc(bookingId);
 
     await bookingRef.update({

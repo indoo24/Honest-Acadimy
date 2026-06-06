@@ -48,6 +48,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
             separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final booking = state.history[index];
+              debugPrint(
+                '[BOOKING HISTORY READ]\ncoachId=${booking.coachId}\ncoachName=${booking.coachName}',
+              );
               return Card(
                 child: ListTile(
                   leading: const Icon(Icons.sports_tennis_rounded),

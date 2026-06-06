@@ -13,16 +13,18 @@ class CoachProfileModel extends CoachProfile {
     required super.isActive,
     required super.availableSlots,
     required super.assignedCourts,
+    required super.weeklyAvailability,
     super.imageUrl,
     super.description,
   });
 
   factory CoachProfileModel.fromMap(Map<String, dynamic> map, {String? id}) {
     final slots = (map['availableSlots'] as List? ?? [])
-        .map(
-          (slot) => _slotFromMap(Map<String, dynamic>.from(slot as Map)),
-        )
+        .map((slot) => _slotFromMap(Map<String, dynamic>.from(slot as Map)))
         .toList();
+    final weeklyAvailability = _weeklyAvailabilityFromMap(
+      map['weeklyAvailability'] as Map<String, dynamic>?,
+    );
     return CoachProfileModel(
       id: id ?? map['id'] as String? ?? '',
       name: map['name'] as String? ?? 'Squash Coach',
@@ -33,8 +35,8 @@ class CoachProfileModel extends CoachProfile {
       rating: (map['rating'] as num?)?.toDouble() ?? 4.8,
       isActive: map['isActive'] as bool? ?? true,
       availableSlots: slots,
-      assignedCourts:
-          (map['assignedCourts'] as List? ?? []).cast<String>(),
+      assignedCourts: (map['assignedCourts'] as List? ?? []).cast<String>(),
+      weeklyAvailability: weeklyAvailability,
       description: map['description'] as String?,
     );
   }
@@ -51,6 +53,9 @@ class CoachProfileModel extends CoachProfile {
       'isActive': isActive,
       'availableSlots': availableSlots.map(_slotToMap).toList(),
       'assignedCourts': assignedCourts,
+      'weeklyAvailability': weeklyAvailability.map(
+        (key, value) => MapEntry(key, _weeklyAvailabilityToMap(value)),
+      ),
       'description': description,
     };
   }
@@ -61,11 +66,11 @@ class CoachProfileModel extends CoachProfile {
       startsAt: (map['startsAt'] is Timestamp)
           ? (map['startsAt'] as Timestamp).toDate()
           : DateTime.tryParse(map['startsAt']?.toString() ?? '') ??
-              DateTime.now(),
+                DateTime.now(),
       endsAt: (map['endsAt'] is Timestamp)
           ? (map['endsAt'] as Timestamp).toDate()
           : DateTime.tryParse(map['endsAt']?.toString() ?? '') ??
-              DateTime.now(),
+                DateTime.now(),
       status: CoachSlotStatus.values.firstWhere(
         (value) => value.name == status,
         orElse: () => CoachSlotStatus.available,
@@ -81,5 +86,28 @@ class CoachProfileModel extends CoachProfile {
       'status': slot.status.name,
       'courtId': slot.courtId,
     };
+  }
+
+  static Map<String, WeeklyAvailabilityRange> _weeklyAvailabilityFromMap(
+    Map<String, dynamic>? map,
+  ) {
+    if (map == null) return const {};
+    final availability = <String, WeeklyAvailabilityRange>{};
+    for (final entry in map.entries) {
+      final value = entry.value;
+      if (value is! Map) continue;
+      final dayMap = Map<String, dynamic>.from(value);
+      availability[entry.key] = WeeklyAvailabilityRange(
+        startHour: (dayMap['startHour'] as num?)?.toInt() ?? 0,
+        endHour: (dayMap['endHour'] as num?)?.toInt() ?? 0,
+      );
+    }
+    return availability;
+  }
+
+  static Map<String, dynamic> _weeklyAvailabilityToMap(
+    WeeklyAvailabilityRange range,
+  ) {
+    return {'startHour': range.startHour, 'endHour': range.endHour};
   }
 }
