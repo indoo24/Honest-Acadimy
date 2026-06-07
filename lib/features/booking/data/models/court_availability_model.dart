@@ -20,18 +20,23 @@ class CourtAvailabilityModel {
   });
 
   factory CourtAvailabilityModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final raw = doc.data();
+    if (raw is! Map<String, dynamic>) {
+      throw StateError('courtAvailability/${doc.id} has no data');
+    }
+    final data = raw;
     return CourtAvailabilityModel(
-      courtId: data['courtId'] as String,
-      workingDays: List<String>.from(data['workingDays'] ?? []),
-      startHour: data['startHour'] as int,
-      endHour: data['endHour'] as int,
-      slotDurationMinutes: data['slotDurationMinutes'] as int,
-      breaks: (data['breaks'] as List<dynamic>? ?? [])
-          .map((e) => BreakPeriod.fromMap(e as Map<String, dynamic>))
+      courtId: data['courtId'] as String? ?? '',
+      workingDays: List<String>.from(data['workingDays'] as List? ?? const []),
+      startHour: (data['startHour'] as num?)?.toInt() ?? 0,
+      endHour: (data['endHour'] as num?)?.toInt() ?? 0,
+      slotDurationMinutes: (data['slotDurationMinutes'] as num?)?.toInt() ?? 60,
+      breaks: (data['breaks'] as List<dynamic>? ?? const [])
+          .map((e) => BreakPeriod.fromMap(Map<String, dynamic>.from(e as Map)))
           .toList(),
       isActive: data['isActive'] as bool? ?? true,
     );
+  }
   }
 
   Map<String, dynamic> toJson() => {
