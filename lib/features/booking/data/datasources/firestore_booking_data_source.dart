@@ -141,11 +141,14 @@ class FirestoreBookingDataSource {
         .where('startsAt', isEqualTo: Timestamp.fromDate(slot.startsAt))
         .where('status', whereIn: _activeStatuses)
         .limit(1);
-    final conflicts = await conflictQuery.get();
-    if (conflicts.docs.isNotEmpty) {
-      throw StateError('Slot is no longer available');
-    }
-    await bookingRef.set(booking.toMap());
+
+    await _firestore.runTransaction((transaction) async {
+      final conflicts = await transaction.get(conflictQuery);
+      if (conflicts.docs.isNotEmpty) {
+        throw StateError('Slot is no longer available');
+      }
+      transaction.set(bookingRef, booking.toMap());
+    });
     final writtenSnapshot = await bookingRef.get();
     final writtenData = writtenSnapshot.data();
     debugPrint(
