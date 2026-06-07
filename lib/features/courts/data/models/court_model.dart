@@ -16,9 +16,11 @@ class CourtModel extends Court {
     final data = doc.data();
     final docId = doc.id;
 
-    debugPrint('═══════════════════════════════════════════════');
-    debugPrint('[📦 COURT PARSE] Document: "$docId"');
-    debugPrint('═══════════════════════════════════════════════');
+    if (kDebugMode) {
+      debugPrint('═══════════════════════════════════════════════');
+      debugPrint('[📦 COURT PARSE] Document: "$docId"');
+      debugPrint('═══════════════════════════════════════════════');
+    }
 
     if (data == null) {
       debugPrint('[📦 COURT PARSE] ❌ FATAL: Document "$docId" data is NULL!');
@@ -27,10 +29,14 @@ class CourtModel extends Court {
       throw StateError('Court document "$docId" has no data');
     }
 
-    debugPrint('[📦 COURT PARSE] Raw data map keys: ${data.keys.toList()}');
-    debugPrint('[📦 COURT PARSE] Raw data entries:');
-    for (final entry in data.entries) {
-      debugPrint('[📦 COURT PARSE]   ${entry.key} => ${entry.value} (type: ${entry.value.runtimeType})');
+    if (kDebugMode) {
+      debugPrint('[📦 COURT PARSE] Raw data map keys: ${data.keys.toList()}');
+      debugPrint('[📦 COURT PARSE] Raw data entries:');
+      for (final entry in data.entries) {
+        debugPrint(
+          '[📦 COURT PARSE]   ${entry.key} => ${entry.value} (type: ${entry.value.runtimeType})',
+        );
+      }
     }
 
     // ── name ──
