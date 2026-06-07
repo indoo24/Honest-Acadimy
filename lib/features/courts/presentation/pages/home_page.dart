@@ -29,9 +29,12 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       final authState = context.read<AuthCubit>().state;
       final user = authState.user;
-      debugPrint(
-        '[HOME ROLE] userId=${user?.id ?? 'anonymous'} role=${user?.role ?? 'unauthenticated'} isAdmin=${user?.isAdmin ?? false}',
-      );
+      assert(() {
+        debugPrint(
+          '[HOME ROLE] userId=${user?.id ?? 'anonymous'} role=${user?.role ?? 'unauthenticated'} isAdmin=${user?.isAdmin ?? false}',
+        );
+        return true;
+      }());
       context.read<CourtsCubit>().loadDashboard();
     });
   }
