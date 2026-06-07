@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/foundation.dart';
+import 'package:honset_app/features/booking/domain/entities/booking_slot.dart';
 import 'package:honset_app/features/booking/domain/entities/booking_slot.dart';
 import 'package:honset_app/features/booking/domain/entities/booking.dart';
 import 'package:honset_app/features/booking/domain/entities/court_availability.dart';
