@@ -17,18 +17,24 @@ class SlotGenerator {
     required List<Booking> bookings,
     DateTime? now,
   }) {
-    // ---------- DEBUG LOGGING START ----------
-    debugPrint('=== Slot Generation Debug ===');
-    debugPrint('[AVAIL] courtId: ${availability.courtId}');
-    debugPrint('[AVAIL] startHour: ${availability.startHour}');
-    debugPrint('[AVAIL] endHour: ${availability.endHour}');
-    debugPrint('[AVAIL] slotDurationMinutes: ${availability.slotDurationMinutes}');
-    debugPrint('[AVAIL] workingDays: ${availability.workingDays}');
-    debugPrint('[AVAIL] breaks: ${availability.breaks}');
-    if (availability.startHour >= availability.endHour) {
-      debugPrint('[WARN] Invalid hour range: startHour (${availability.startHour}) >= endHour (${availability.endHour})');
+    if (kDebugMode) {
+      // ---------- DEBUG LOGGING START ----------
+      debugPrint('=== Slot Generation Debug ===');
+      debugPrint('[AVAIL] courtId: ${availability.courtId}');
+      debugPrint('[AVAIL] startHour: ${availability.startHour}');
+      debugPrint('[AVAIL] endHour: ${availability.endHour}');
+      debugPrint(
+        '[AVAIL] slotDurationMinutes: ${availability.slotDurationMinutes}',
+      );
+      debugPrint('[AVAIL] workingDays: ${availability.workingDays}');
+      debugPrint('[AVAIL] breaks: ${availability.breaks}');
+      if (availability.startHour >= availability.endHour) {
+        debugPrint(
+          '[WARN] Invalid hour range: startHour (${availability.startHour}) >= endHour (${availability.endHour})',
+        );
+      }
+      // ---------- DEBUG LOGGING END ------------
     }
-    // ---------- DEBUG LOGGING END ------------
 
     if (!availability.isActive) return [];
 
