@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:honset_app/config/router/app_router.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
+import 'package:honset_app/core/di/injection.dart';
 import 'package:honset_app/core/utils/date_time_extensions.dart';
 import 'package:honset_app/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:honset_app/features/booking/data/datasources/firestore_booking_data_source.dart';
 import 'package:honset_app/features/booking/domain/entities/booking_slot.dart';
+import 'package:honset_app/features/booking/domain/repositories/court_availability_repository.dart';
+import 'package:honset_app/features/booking/domain/usecases/generate_slots.dart';
 import 'package:honset_app/features/booking/presentation/cubit/booking_cubit.dart';
 import 'package:honset_app/features/booking/presentation/cubit/booking_state.dart';
 import 'package:honset_app/features/coaches/domain/entities/coach_profile.dart';
@@ -23,11 +27,83 @@ class CourtDetailsPage extends StatefulWidget {
 
 class _CourtDetailsPageState extends State<CourtDetailsPage> {
   BookingSlot? _selectedSlot;
+  List<BookingSlot> _slots = const [];
+  bool _isLoadingSlots = false;
+  String? _slotLoadError;
 
   @override
   void initState() {
     super.initState();
     _selectedSlot = widget.args?.initialSlot;
+    _slots = widget.args?.slots ?? const [];
+    _loadCourtDetailsSlots();
+  }
+
+  DateTime _detailsDate(CourtDetailsArgs args) {
+    final source =
+        args.selectedDate ??
+        args.initialSlot?.startsAt ??
+        (args.slots.isNotEmpty ? args.slots.first.startsAt : DateTime.now());
+    return DateTime(source.year, source.month, source.day);
+  }
+
+  Future<void> _loadCourtDetailsSlots() async {
+    final args = widget.args;
+    if (args == null) return;
+    final date = _detailsDate(args);
+    setState(() {
+      _isLoadingSlots = true;
+      _slotLoadError = null;
+    });
+    try {
+      final availability = await getIt<CourtAvailabilityRepository>()
+          .getAvailabilityByCourtId(args.court.id);
+      final bookings = await getIt<FirestoreBookingDataSource>()
+          .getActiveBookingsForCourt(courtId: args.court.id, date: date);
+      debugPrint(
+        '[COURT DETAILS BOOKINGS]\n'
+        'courtId: ${args.court.id}\n'
+        'date: $date\n'
+        'bookings count: ${bookings.length}',
+      );
+      final slots = availability == null
+          ? <BookingSlot>[]
+          : getIt<SlotGenerator>().generate(
+              date: date,
+              availability: availability,
+              bookings: bookings,
+            );
+      for (final slot in slots) {
+        debugPrint(
+          '[SLOT MERGE]\n'
+          'time: ${slot.startsAt.timeLabel}\n'
+          'status: ${slot.status.name}',
+        );
+      }
+      if (!mounted) return;
+      setState(() {
+        _slots = slots;
+        _selectedSlot = _matchingSlot(slots, _selectedSlot);
+        _isLoadingSlots = false;
+      });
+    } on Object catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingSlots = false;
+        _slotLoadError = error.toString();
+      });
+    }
+  }
+
+  BookingSlot? _matchingSlot(
+    List<BookingSlot> slots,
+    BookingSlot? selectedSlot,
+  ) {
+    if (selectedSlot == null) return null;
+    for (final slot in slots) {
+      if (slot.id == selectedSlot.id) return slot;
+    }
+    return null;
   }
 
   @override
@@ -157,9 +233,22 @@ class _CourtDetailsPageState extends State<CourtDetailsPage> {
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
                 ),
+                if (_isLoadingSlots) ...[
+                  const SizedBox(height: 10),
+                  const LinearProgressIndicator(),
+                ],
+                if (_slotLoadError != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    _slotLoadError!,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: AppColors.dangerRed),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 _ResponsiveSlotWrap(
-                  slots: args.slots,
+                  slots: _slots,
                   selectedSlot: _selectedSlot,
                   onSelected: (slot) => setState(() => _selectedSlot = slot),
                 ),
@@ -198,6 +287,7 @@ class _CourtDetailsPageState extends State<CourtDetailsPage> {
         return _BookingSheet(parentContext: context, args: args, slot: slot);
       },
     );
+    if (mounted) await _loadCourtDetailsSlots();
   }
 }
 
