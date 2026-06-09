@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:honset_app/features/booking/domain/entities/booking_slot.dart';
 import 'package:honset_app/features/booking/domain/repositories/booking_repository.dart';
@@ -18,6 +19,8 @@ class BookingCubit extends Cubit<BookingState> {
   }) async {
     emit(state.copyWith(status: BookingActionStatus.loading));
     try {
+      debugPrint('CUBIT COACH ID: $coachId');
+      debugPrint('CUBIT COACH NAME: $coachName');
       final booking = await _repository.reserveSlot(
         coachId: coachId,
         coachName: coachName,

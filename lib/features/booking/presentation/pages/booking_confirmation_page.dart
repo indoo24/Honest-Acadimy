@@ -186,6 +186,8 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                               setState(() => _selectedCoachId = null);
                               return;
                             }
+                            debugPrint('SELECTED COACH ID: ${match.id}');
+                            debugPrint('SELECTED COACH NAME: ${match.name}');
                             debugPrint(
                               '[COACH SELECTED]\nid=${match.id}\nname=${match.name}',
                             );
@@ -237,6 +239,8 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                           );
                           return;
                         }
+                        debugPrint('BOOKING COACH ID: ${selectedCoach.id}');
+                        debugPrint('BOOKING COACH NAME: ${selectedCoach.name}');
                         debugPrint(
                           '[COACH SELECTED]\nid=${selectedCoach.id}\nname=${selectedCoach.name}',
                         );

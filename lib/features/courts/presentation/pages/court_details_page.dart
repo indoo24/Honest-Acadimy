@@ -218,6 +218,7 @@ class _BookingSheet extends StatefulWidget {
 
 class _BookingSheetState extends State<_BookingSheet> {
   String? _selectedCoachId;
+  CoachProfile? _selectedCoach;
   String? _bookedByUserId;
 
   CoachProfile? _findCoachById(List<CoachProfile> coaches, String? coachId) {
@@ -306,10 +307,9 @@ class _BookingSheetState extends State<_BookingSheet> {
               BlocBuilder<CoachesCubit, CoachesState>(
                 builder: (context, state) {
                   final coaches = state.coaches;
-                  final selectedCoach = _findCoachById(
-                    coaches,
-                    _selectedCoachId,
-                  );
+                  final selectedCoach = _selectedCoach == null
+                      ? null
+                      : _findCoachById(coaches, _selectedCoach!.id);
                   if (_selectedCoachId != null && selectedCoach == null) {
                     _reportInvalidCoachSelection(
                       selectedCoachId: _selectedCoachId,
@@ -372,13 +372,17 @@ class _BookingSheetState extends State<_BookingSheet> {
                                   selectedCoachId: value,
                                   coaches: coaches,
                                 );
-                                setState(() => _selectedCoachId = null);
                                 return;
                               }
+                              debugPrint('SELECTED COACH ID: ${match.id}');
+                              debugPrint('SELECTED COACH NAME: ${match.name}');
                               debugPrint(
                                 '[COACH SELECTED]\nid=${match.id}\nname=${match.name}',
                               );
-                              setState(() => _selectedCoachId = match.id);
+                              setState(() {
+                                _selectedCoach = match;
+                                _selectedCoachId = match.id;
+                              });
                             },
                     ),
                   );
@@ -390,20 +394,17 @@ class _BookingSheetState extends State<_BookingSheet> {
                     state.status == BookingActionStatus.loading,
                 builder: (context, isLoading) {
                   return FilledButton.icon(
-                    onPressed: isLoading || _selectedCoachId == null
+                    onPressed: isLoading || _selectedCoach == null
                         ? null
                         : () async {
-                            final coachesState = widget.parentContext
-                                .read<CoachesCubit>()
-                                .state;
-                            final coach = _findCoachById(
-                              coachesState.coaches,
-                              _selectedCoachId,
-                            );
+                            final coach = _selectedCoach;
                             if (coach == null) {
                               _reportInvalidCoachSelection(
                                 selectedCoachId: _selectedCoachId,
-                                coaches: coachesState.coaches,
+                                coaches: widget.parentContext
+                                    .read<CoachesCubit>()
+                                    .state
+                                    .coaches,
                               );
                               if (mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -419,7 +420,10 @@ class _BookingSheetState extends State<_BookingSheet> {
                             if (coach.id != _selectedCoachId) {
                               _reportInvalidCoachSelection(
                                 selectedCoachId: _selectedCoachId,
-                                coaches: coachesState.coaches,
+                                coaches: widget.parentContext
+                                    .read<CoachesCubit>()
+                                    .state
+                                    .coaches,
                               );
                               if (mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -432,6 +436,10 @@ class _BookingSheetState extends State<_BookingSheet> {
                               }
                               return;
                             }
+                            debugPrint('SELECTED COACH ID: ${coach.id}');
+                            debugPrint('SELECTED COACH NAME: ${coach.name}');
+                            debugPrint('BOOKING COACH ID: ${coach.id}');
+                            debugPrint('BOOKING COACH NAME: ${coach.name}');
                             debugPrint(
                               '[COACH SELECTED]\nid=${coach.id}\nname=${coach.name}',
                             );

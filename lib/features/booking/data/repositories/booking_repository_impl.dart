@@ -103,6 +103,8 @@ class BookingRepositoryImpl implements BookingRepository {
     String? bookedByUserId,
   }) async {
     if (!slot.canBook) throw StateError('This slot is not available');
+    debugPrint('REPOSITORY COACH ID: $coachId');
+    debugPrint('REPOSITORY COACH NAME: $coachName');
     return _remoteDataSource.reserveSlot(
       coachId: coachId,
       coachName: coachName,

@@ -145,6 +145,8 @@ class FirestoreBookingDataSource {
     if (conflicts.docs.isNotEmpty) {
       throw StateError('Slot is no longer available');
     }
+    debugPrint('FIRESTORE COACH ID: ${booking.coachId}');
+    debugPrint('FIRESTORE COACH NAME: ${booking.coachName}');
     await bookingRef.set(booking.toMap());
     final writtenSnapshot = await bookingRef.get();
     final writtenData = writtenSnapshot.data();
