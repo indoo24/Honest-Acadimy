@@ -1,5 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:honset_app/core/services/notification_service.dart';
 
 import '../../firebase_options.dart';
 
@@ -14,7 +14,7 @@ class FirebaseBootstrap {
         options: DefaultFirebaseOptions.currentPlatform,
       );
       isConfigured = true;
-      await FirebaseMessaging.instance.requestPermission();
+      await NotificationService.instance.initialize();
     } on Object {
       isConfigured = false;
     }

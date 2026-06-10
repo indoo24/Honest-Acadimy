@@ -12,8 +12,8 @@ class FirestoreBookingDataSource {
 
   static const List<String> _activeStatuses = [
     'confirmed',
-    'pending_payment',
-    'pending_payment_review',
+    'pendingPayment',
+    'pendingPaymentReview',
   ];
 
   void _logBookingsQuery(String message) {
@@ -121,7 +121,7 @@ class FirestoreBookingDataSource {
       coachName: coachName,
       startsAt: slot.startsAt,
       endsAt: slot.endsAt,
-      status: BookingStatus.pending_payment,
+      status: BookingStatus.pendingPayment,
       amount: court.pricePerHour,
       qrPayload: 'HONSET:${bookingRef.id}:${slot.startsAt.toIso8601String()}',
       createdAt: DateTime.now(),

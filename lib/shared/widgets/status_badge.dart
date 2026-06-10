@@ -39,8 +39,8 @@ class StatusBadge extends StatelessWidget {
 
   String get _bookingLabel {
     return switch (bookingStatus!) {
-      BookingStatus.pending_payment => 'PENDING PAYMENT',
-      BookingStatus.pending_payment_review => 'PAYMENT REVIEW',
+      BookingStatus.pendingPayment => 'PENDING PAYMENT',
+      BookingStatus.pendingPaymentReview => 'PAYMENT REVIEW',
       BookingStatus.confirmed => 'CONFIRMED',
       BookingStatus.rejected => 'REJECTED',
       BookingStatus.cancelled => 'CANCELLED',
@@ -63,9 +63,9 @@ class StatusBadge extends StatelessWidget {
     switch (bookingStatus) {
       case BookingStatus.confirmed:
         return AppColors.squashGreen;
-      case BookingStatus.pending_payment:
+      case BookingStatus.pendingPayment:
         return AppColors.rallyOrange;
-      case BookingStatus.pending_payment_review:
+      case BookingStatus.pendingPaymentReview:
         return Colors.deepOrange;
       case BookingStatus.rejected:
         return AppColors.dangerRed;

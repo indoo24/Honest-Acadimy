@@ -472,8 +472,8 @@ class _ReservationRow extends StatelessWidget {
 
   String _statusLabel(BookingStatus status) {
     return switch (status) {
-      BookingStatus.pending_payment => 'Pending payment',
-      BookingStatus.pending_payment_review => 'Pending review',
+      BookingStatus.pendingPayment => 'Pending payment',
+      BookingStatus.pendingPaymentReview => 'Pending review',
       BookingStatus.confirmed => 'Confirmed',
       BookingStatus.rejected => 'Rejected',
       BookingStatus.cancelled => 'Cancelled',
@@ -483,8 +483,8 @@ class _ReservationRow extends StatelessWidget {
   Color _statusColor(BookingStatus status) {
     return switch (status) {
       BookingStatus.confirmed => AppColors.squashGreen,
-      BookingStatus.pending_payment ||
-      BookingStatus.pending_payment_review => AppColors.rallyOrange,
+      BookingStatus.pendingPayment ||
+      BookingStatus.pendingPaymentReview => AppColors.rallyOrange,
       BookingStatus.rejected || BookingStatus.cancelled => AppColors.dangerRed,
     };
   }

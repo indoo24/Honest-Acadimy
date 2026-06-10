@@ -380,9 +380,9 @@ class _BookingCard extends StatelessWidget {
     switch (booking.status) {
       case BookingStatus.confirmed:
         return 'Confirmed';
-      case BookingStatus.pending_payment:
+      case BookingStatus.pendingPayment:
         return 'Pending payment';
-      case BookingStatus.pending_payment_review:
+      case BookingStatus.pendingPaymentReview:
         return 'Pending review';
       case BookingStatus.rejected:
         return 'Rejected';
@@ -396,9 +396,9 @@ class _BookingCard extends StatelessWidget {
     switch (booking.status) {
       case BookingStatus.confirmed:
         return 'Confirmed';
-      case BookingStatus.pending_payment_review:
+      case BookingStatus.pendingPaymentReview:
         return 'Payment under review';
-      case BookingStatus.pending_payment:
+      case BookingStatus.pendingPayment:
         return 'Awaiting payment';
       case BookingStatus.rejected:
         return 'Rejected';
@@ -411,8 +411,8 @@ class _BookingCard extends StatelessWidget {
     switch (booking.status) {
       case BookingStatus.confirmed:
         return AppColors.squashGreen;
-      case BookingStatus.pending_payment:
-      case BookingStatus.pending_payment_review:
+      case BookingStatus.pendingPayment:
+      case BookingStatus.pendingPaymentReview:
         return AppColors.rallyOrange;
       case BookingStatus.rejected:
       case BookingStatus.cancelled:

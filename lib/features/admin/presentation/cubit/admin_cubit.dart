@@ -6,10 +6,13 @@ import 'package:honset_app/features/admin/presentation/cubit/admin_state.dart';
 import 'package:honset_app/features/booking/domain/entities/booking.dart';
 import 'package:honset_app/features/booking/domain/repositories/booking_repository.dart';
 
+import 'package:honset_app/shared/repositories/notification_repository.dart';
+
 class AdminCubit extends Cubit<AdminState> {
-  AdminCubit(this._bookingRepository) : super(const AdminState.initial());
+  AdminCubit(this._bookingRepository, this._notificationRepository) : super(const AdminState.initial());
 
   final BookingRepository _bookingRepository;
+  final NotificationRepository _notificationRepository;
 
   StreamSubscription<List<Booking>>? _bookingSubscription;
 
@@ -66,6 +69,16 @@ class AdminCubit extends Cubit<AdminState> {
   Future<void> confirmBooking(String bookingId) async {
     try {
       await _bookingRepository.confirmBooking(bookingId);
+      final booking = state.bookings.firstWhere((b) => b.id == bookingId);
+      if (booking.bookedByUserId != null) {
+        await _notificationRepository.sendNotification(
+          receiverId: booking.bookedByUserId!,
+          title: 'Booking confirmed',
+          body: '${booking.courtName} at ${booking.startsAt.hour}:00',
+          type: 'booking_confirmed',
+          bookingId: bookingId,
+        );
+      }
     } on Object catch (error) {
       emit(
         state.copyWith(status: AdminStatus.failure, message: error.toString()),
@@ -76,6 +89,16 @@ class AdminCubit extends Cubit<AdminState> {
   Future<void> rejectBooking(String bookingId) async {
     try {
       await _bookingRepository.rejectBooking(bookingId);
+      final booking = state.bookings.firstWhere((b) => b.id == bookingId);
+      if (booking.bookedByUserId != null) {
+        await _notificationRepository.sendNotification(
+          receiverId: booking.bookedByUserId!,
+          title: 'Booking rejected',
+          body: '${booking.courtName} at ${booking.startsAt.hour}:00',
+          type: 'booking_rejected',
+          bookingId: bookingId,
+        );
+      }
     } on Object catch (error) {
       emit(
         state.copyWith(status: AdminStatus.failure, message: error.toString()),

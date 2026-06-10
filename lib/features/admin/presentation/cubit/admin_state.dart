@@ -26,8 +26,8 @@ class AdminState extends Equatable {
   List<Booking> get pendingBookings => bookings
       .where(
         (booking) =>
-            booking.status == BookingStatus.pending_payment ||
-            booking.status == BookingStatus.pending_payment_review,
+            booking.status == BookingStatus.pendingPayment ||
+            booking.status == BookingStatus.pendingPaymentReview,
       )
       .toList();
 

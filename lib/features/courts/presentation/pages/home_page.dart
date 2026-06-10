@@ -14,6 +14,8 @@ import 'package:honset_app/shared/widgets/error_state.dart';
 import 'package:honset_app/shared/widgets/skeleton_loader.dart';
 import 'package:honset_app/shared/widgets/status_badge.dart';
 
+import 'package:honset_app/shared/widgets/notification_bell.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -44,6 +46,7 @@ class _HomePageState extends State<HomePage> {
           appBar: AppBar(
             title: const AppLogo(size: 40),
             actions: [
+              const NotificationBell(),
               IconButton(
                 tooltip: 'Refresh',
                 onPressed: () => context.read<CourtsCubit>().loadDashboard(),

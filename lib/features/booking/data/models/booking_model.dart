@@ -24,7 +24,7 @@ class BookingModel extends Booking {
     DocumentSnapshot<Map<String, dynamic>> doc,
   ) {
     final data = doc.data() ?? {};
-    final status = data['status'] as String? ?? 'pending_payment';
+    final status = data['status'] as String? ?? 'pendingPayment';
     debugPrint(
       '[BOOKING FIRESTORE READ]\ncoachId=${data['coachId']}\ncoachName=${data['coachName']}',
     );
@@ -38,7 +38,7 @@ class BookingModel extends Booking {
       endsAt: (data['endsAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       status: BookingStatus.values.firstWhere(
         (value) => value.name == status,
-        orElse: () => BookingStatus.pending_payment,
+        orElse: () => BookingStatus.pendingPayment,
       ),
       amount: (data['amount'] as num?)?.toDouble() ?? 0,
       qrPayload: data['qrPayload'] as String? ?? doc.id,

@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 enum BookingStatus {
-  pending_payment,
-  pending_payment_review,
+  pendingPayment,
+  pendingPaymentReview,
   confirmed,
   rejected,
   cancelled,

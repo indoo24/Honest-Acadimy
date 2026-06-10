@@ -20,6 +20,7 @@ import 'package:honset_app/features/courts/domain/entities/court.dart';
 import 'package:honset_app/features/courts/presentation/pages/court_details_page.dart';
 import 'package:honset_app/features/courts/presentation/pages/home_page.dart';
 import 'package:honset_app/features/profile/presentation/pages/profile_page.dart';
+import 'package:honset_app/shared/pages/notifications_page.dart';
 import 'package:honset_app/shared/widgets/app_shell.dart';
 
 class BookingFlowArgs {
@@ -73,72 +74,123 @@ class AppRouter {
           return null;
         },
         routes: [
-          GoRoute(path: '/', builder: (context, state) => const SplashPage()),
+          GoRoute(
+            path: '/',
+            pageBuilder: (context, state) => MaterialPage(
+              key: state.pageKey,
+              child: const SplashPage(),
+            ),
+          ),
           GoRoute(
             path: '/login',
-            builder: (context, state) => const LoginPage(),
+            pageBuilder: (context, state) => MaterialPage(
+              key: state.pageKey,
+              child: const LoginPage(),
+            ),
           ),
           GoRoute(
             path: '/register',
-            builder: (context, state) => const RegisterPage(),
+            pageBuilder: (context, state) => MaterialPage(
+              key: state.pageKey,
+              child: const RegisterPage(),
+            ),
           ),
           ShellRoute(
-            builder: (context, state, child) =>
-                AppShell(location: state.uri.path, child: child),
+            pageBuilder: (context, state, child) => MaterialPage(
+              key: state.pageKey,
+              child: AppShell(location: state.uri.path, child: child),
+            ),
             routes: [
               GoRoute(
                 path: '/home',
-                builder: (context, state) => const HomePage(),
+                pageBuilder: (context, state) => MaterialPage(
+                  key: state.pageKey,
+                  child: const HomePage(),
+                ),
               ),
               GoRoute(
                 path: '/history',
-                builder: (context, state) => const BookingHistoryPage(),
+                pageBuilder: (context, state) => MaterialPage(
+                  key: state.pageKey,
+                  child: const BookingHistoryPage(),
+                ),
               ),
               GoRoute(
                 path: '/coaches',
-                builder: (context, state) => const CoachesScreen(),
+                pageBuilder: (context, state) => MaterialPage(
+                  key: state.pageKey,
+                  child: const CoachesScreen(),
+                ),
               ),
               GoRoute(
                 path: '/admin',
-                builder: (context, state) => const AdminDashboardPage(),
+                pageBuilder: (context, state) => MaterialPage(
+                  key: state.pageKey,
+                  child: const AdminDashboardPage(),
+                ),
               ),
               GoRoute(
                 path: '/profile',
-                builder: (context, state) => const ProfilePage(),
+                pageBuilder: (context, state) => MaterialPage(
+                  key: state.pageKey,
+                  child: const ProfilePage(),
+                ),
               ),
             ],
           ),
           GoRoute(
             path: '/court/details',
-            builder: (context, state) {
+            pageBuilder: (context, state) {
               final args = state.extra as CourtDetailsArgs?;
-              return CourtDetailsPage(args: args);
+              return MaterialPage(
+                key: state.pageKey,
+                child: CourtDetailsPage(args: args),
+              );
             },
           ),
           GoRoute(
             path: '/booking/details',
-            builder: (context, state) {
+            pageBuilder: (context, state) {
               final args = state.extra as BookingFlowArgs?;
-              return BookingDetailsPage(args: args);
+              return MaterialPage(
+                key: state.pageKey,
+                child: BookingDetailsPage(args: args),
+              );
             },
           ),
           GoRoute(
             path: '/booking/confirm',
-            builder: (context, state) {
+            pageBuilder: (context, state) {
               final args = state.extra as BookingFlowArgs?;
-              return BookingConfirmationPage(args: args);
+              return MaterialPage(
+                key: state.pageKey,
+                child: BookingConfirmationPage(args: args),
+              );
             },
           ),
           GoRoute(
             path: '/booking/success',
-            builder: (context, state) => const BookingSuccessPage(),
+            pageBuilder: (context, state) => MaterialPage(
+              key: state.pageKey,
+              child: const BookingSuccessPage(),
+            ),
           ),
           GoRoute(
             path: '/coaches/details',
-            builder: (context, state) {
+            pageBuilder: (context, state) {
               final args = state.extra as CoachDetailsArgs?;
-              return CoachDetailsScreen(args: args);
+              return MaterialPage(
+                key: state.pageKey,
+                child: CoachDetailsScreen(args: args),
+              );
             },
+          ),
+          GoRoute(
+            path: '/notifications',
+            pageBuilder: (context, state) => MaterialPage(
+              key: state.pageKey,
+              child: const NotificationsPage(),
+            ),
           ),
         ],
       );

@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/foundation.dart';
 import 'package:honset_app/features/booking/domain/entities/booking_slot.dart';
 import 'package:honset_app/features/booking/domain/entities/booking.dart';
 import 'package:honset_app/features/booking/domain/entities/court_availability.dart';
@@ -116,8 +115,8 @@ class SlotGenerator {
   }
 
   bool _isBlockingBooking(Booking booking) {
-    return booking.status == BookingStatus.pending_payment ||
-        booking.status == BookingStatus.pending_payment_review ||
+    return booking.status == BookingStatus.pendingPayment ||
+        booking.status == BookingStatus.pendingPaymentReview ||
         booking.status == BookingStatus.confirmed;
   }
 
@@ -142,4 +141,3 @@ class SlotGenerator {
     return SlotStatus.pending;
   }
 }
-
