@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:honset_app/config/router/app_router.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
 import 'package:honset_app/core/di/injection.dart';
@@ -526,24 +527,20 @@ class _BookingSheetState extends State<_BookingSheet> {
                               }
                               return;
                             }
-                            debugPrint('SELECTED COACH ID: ${coach.id}');
-                            debugPrint('SELECTED COACH NAME: ${coach.name}');
-                            debugPrint('BOOKING COACH ID: ${coach.id}');
-                            debugPrint('BOOKING COACH NAME: ${coach.name}');
-                            debugPrint(
-                              '[COACH SELECTED]\nid=${coach.id}\nname=${coach.name}',
-                            );
-                            debugPrint(
-                              '[BOOKING CREATED]\ncoachId=${coach.id}\ncoachName=${coach.name}',
-                            );
-                            await context.read<BookingCubit>().reserve(
-                              coachId: coach.id,
-                              coachName: coach.name,
-                              court: widget.args.court,
-                              slot: widget.slot,
-                              bookedByUserId: _bookedByUserId,
-                            );
-                            if (!mounted) return;
+                            debugPrint('[BOOK FLOW]\nCourt details book clicked');
+                            debugPrint('[NAVIGATION]\nOpening booking confirmation page');
+                            if (mounted) {
+                              Navigator.of(context).pop();
+                              context.push(
+                                '/booking/confirm',
+                                extra: BookingFlowArgs(
+                                  court: widget.args.court,
+                                  slot: widget.slot,
+                                  coachId: coach.id,
+                                  coachName: coach.name,
+                                ),
+                              );
+                            }
                           },
                     icon: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 180),

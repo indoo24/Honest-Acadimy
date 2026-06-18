@@ -101,6 +101,7 @@ class BookingRepositoryImpl implements BookingRepository {
     required Court court,
     required BookingSlot slot,
     String? bookedByUserId,
+    String? paymentMethod,
   }) async {
     if (!slot.canBook) throw StateError('This slot is not available');
     debugPrint('REPOSITORY COACH ID: $coachId');
@@ -111,6 +112,7 @@ class BookingRepositoryImpl implements BookingRepository {
       court: court,
       slot: slot,
       bookedByUserId: bookedByUserId,
+      paymentMethod: paymentMethod,
     );
   }
 

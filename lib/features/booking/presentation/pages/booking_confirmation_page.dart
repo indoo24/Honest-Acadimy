@@ -24,6 +24,7 @@ class BookingConfirmationPage extends StatefulWidget {
 
 class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   String? _selectedCoachId;
+  String _selectedPaymentMethod = 'cash';
 
   CoachProfile? _findCoachById(List<CoachProfile> coaches, String? coachId) {
     if (coachId == null) return null;
@@ -51,6 +52,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   @override
   void initState() {
     super.initState();
+    _selectedCoachId = widget.args?.coachId;
     final cubit = context.read<CoachesCubit>();
     cubit.watchCoaches();
   }
@@ -198,6 +200,36 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                   );
                 },
               ),
+              const SizedBox(height: 16),
+              Text(
+                'Payment Method',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              RadioListTile<String>(
+                title: const Text('Cash'),
+                value: 'cash',
+                groupValue: _selectedPaymentMethod,
+                onChanged: (value) {
+                  if (value != null) {
+                    debugPrint('[PAYMENT SELECTED] method=$value');
+                    setState(() => _selectedPaymentMethod = value);
+                  }
+                },
+              ),
+              RadioListTile<String>(
+                title: const Text('InstaPay'),
+                value: 'instapay',
+                groupValue: _selectedPaymentMethod,
+                onChanged: (value) {
+                  if (value != null) {
+                    debugPrint('[PAYMENT SELECTED] method=$value');
+                    setState(() => _selectedPaymentMethod = value);
+                  }
+                },
+              ),
               const SizedBox(height: 20),
               PrimaryButton(
                 label: 'Confirm reservation',
@@ -247,12 +279,26 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                         debugPrint(
                           '[BOOKING CREATED]\ncoachId=${selectedCoach.id}\ncoachName=${selectedCoach.name}',
                         );
+                        if (_selectedPaymentMethod == 'instapay') {
+                          context.push(
+                            '/booking/payment',
+                            extra: BookingPaymentArgs(
+                              court: flow.court,
+                              slot: flow.slot,
+                              coachId: selectedCoach.id,
+                              coachName: selectedCoach.name,
+                            ),
+                          );
+                          return;
+                        }
+                        debugPrint('[RESERVE CALLED]\nmethod=cash');
                         context.read<BookingCubit>().reserve(
                           coachId: selectedCoach.id,
                           coachName: selectedCoach.name,
                           court: flow.court,
                           slot: flow.slot,
                           bookedByUserId: authUser?.id,
+                          paymentMethod: 'cash',
                         );
                       },
               ),

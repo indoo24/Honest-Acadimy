@@ -13,7 +13,7 @@ class FirestoreBookingDataSource {
   static const List<String> _activeStatuses = [
     'confirmed',
     'pendingPayment',
-    'pendingPaymentReview',
+    'pending_payment_review',
   ];
 
   void _logBookingsQuery(String message) {
@@ -121,12 +121,17 @@ class FirestoreBookingDataSource {
       coachName: coachName,
       startsAt: slot.startsAt,
       endsAt: slot.endsAt,
-      status: BookingStatus.pendingPayment,
+      status: paymentMethod == 'cash' 
+          ? BookingStatus.confirmed 
+          : paymentMethod == 'instapay'
+              ? BookingStatus.pendingPaymentReview
+              : BookingStatus.pendingPayment,
       amount: court.pricePerHour,
       qrPayload: 'HONSET:${bookingRef.id}:${slot.startsAt.toIso8601String()}',
       createdAt: DateTime.now(),
       bookedByUserId: bookedByUserId,
       paymentMethod: paymentMethod,
+      paymentConfirmed: paymentMethod == 'cash' ? false : paymentMethod == 'instapay' ? false : false,
     );
     debugPrint(
       '[BOOKING CREATED]\ncoachId=${booking.coachId}\ncoachName=${booking.coachName}',
@@ -256,7 +261,7 @@ class FirestoreBookingDataSource {
     if (data == null) throw StateError('Booking not found: $bookingId');
 
     await bookingRef.update({
-      'status': BookingStatus.confirmed.name,
+      'status': 'confirmed',
       'paymentConfirmed': true,
       'updatedAt': FieldValue.serverTimestamp(),
     });
@@ -271,7 +276,7 @@ class FirestoreBookingDataSource {
     if (data == null) throw StateError('Booking not found: $bookingId');
 
     await bookingRef.update({
-      'status': BookingStatus.rejected.name,
+      'status': 'rejected',
       'updatedAt': FieldValue.serverTimestamp(),
     });
     debugPrint('[FirestoreBookingDataSource] rejectBooking($bookingId)');
@@ -284,7 +289,7 @@ class FirestoreBookingDataSource {
     final bookingRef = _firestore.collection('bookings').doc(bookingId);
 
     await bookingRef.update({
-      'status': BookingStatus.cancelled.name,
+      'status': 'cancelled',
       'updatedAt': FieldValue.serverTimestamp(),
     });
     debugPrint('[FirestoreBookingDataSource] cancelBooking($bookingId)');

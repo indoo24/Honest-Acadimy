@@ -24,6 +24,7 @@ abstract class BookingRepository {
     required Court court,
     required BookingSlot slot,
     String? bookedByUserId,
+    String? paymentMethod,
   });
 
   Future<List<Booking>> getUserBookings(String userId);

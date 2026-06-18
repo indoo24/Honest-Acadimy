@@ -36,10 +36,7 @@ class BookingModel extends Booking {
       coachName: data['coachName'] as String? ?? 'Coach',
       startsAt: (data['startsAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       endsAt: (data['endsAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      status: BookingStatus.values.firstWhere(
-        (value) => value.name == status,
-        orElse: () => BookingStatus.pendingPayment,
-      ),
+      status: _statusFromString(status),
       amount: (data['amount'] as num?)?.toDouble() ?? 0,
       qrPayload: data['qrPayload'] as String? ?? doc.id,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -58,7 +55,7 @@ class BookingModel extends Booking {
       'coachName': coachName,
       'startsAt': Timestamp.fromDate(startsAt),
       'endsAt': Timestamp.fromDate(endsAt),
-      'status': status.name,
+      'status': _statusToString(status),
       'amount': amount,
       'qrPayload': qrPayload,
       'bookedByUserId': bookedByUserId,
@@ -67,5 +64,38 @@ class BookingModel extends Booking {
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': FieldValue.serverTimestamp(),
     };
+  }
+
+  static BookingStatus _statusFromString(String? status) {
+    switch (status) {
+      case 'pendingPayment':
+        return BookingStatus.pendingPayment;
+      case 'pending_payment_review':
+      case 'pendingPaymentReview': // legacy support
+        return BookingStatus.pendingPaymentReview;
+      case 'confirmed':
+        return BookingStatus.confirmed;
+      case 'rejected':
+        return BookingStatus.rejected;
+      case 'cancelled':
+        return BookingStatus.cancelled;
+      default:
+        return BookingStatus.pendingPayment;
+    }
+  }
+
+  static String _statusToString(BookingStatus status) {
+    switch (status) {
+      case BookingStatus.pendingPayment:
+        return 'pendingPayment';
+      case BookingStatus.pendingPaymentReview:
+        return 'pending_payment_review';
+      case BookingStatus.confirmed:
+        return 'confirmed';
+      case BookingStatus.rejected:
+        return 'rejected';
+      case BookingStatus.cancelled:
+        return 'cancelled';
+    }
   }
 }

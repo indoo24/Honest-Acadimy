@@ -20,6 +20,7 @@ class BookingCubit extends Cubit<BookingState> {
     required Court court,
     required BookingSlot slot,
     String? bookedByUserId,
+    String? paymentMethod,
   }) async {
     emit(state.copyWith(status: BookingActionStatus.loading));
     try {
@@ -31,6 +32,7 @@ class BookingCubit extends Cubit<BookingState> {
         court: court,
         slot: slot,
         bookedByUserId: bookedByUserId,
+        paymentMethod: paymentMethod,
       );
 
       if (booking.status == BookingStatus.pendingPaymentReview) {
