@@ -15,7 +15,12 @@ class NotificationBell extends StatelessWidget {
           children: [
             IconButton(
               icon: const Icon(Icons.notifications),
-              onPressed: () => context.push('/notifications'),
+              onPressed: () {
+                final location = GoRouterState.of(context).uri.path;
+                if (location != '/notifications') {
+                  context.push('/notifications');
+                }
+              },
             ),
             if (state.unreadCount > 0)
               Positioned(

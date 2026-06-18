@@ -121,17 +121,15 @@ class FirestoreBookingDataSource {
       coachName: coachName,
       startsAt: slot.startsAt,
       endsAt: slot.endsAt,
-      status: paymentMethod == 'cash' 
-          ? BookingStatus.confirmed 
-          : paymentMethod == 'instapay'
-              ? BookingStatus.pendingPaymentReview
-              : BookingStatus.pendingPayment,
+      status: paymentMethod == 'cash' || paymentMethod == 'instapay'
+          ? BookingStatus.pendingPaymentReview
+          : BookingStatus.pendingPayment,
       amount: court.pricePerHour,
       qrPayload: 'HONSET:${bookingRef.id}:${slot.startsAt.toIso8601String()}',
       createdAt: DateTime.now(),
       bookedByUserId: bookedByUserId,
       paymentMethod: paymentMethod,
-      paymentConfirmed: paymentMethod == 'cash' ? false : paymentMethod == 'instapay' ? false : false,
+      paymentConfirmed: false,
     );
     debugPrint(
       '[BOOKING CREATED]\ncoachId=${booking.coachId}\ncoachName=${booking.coachName}',

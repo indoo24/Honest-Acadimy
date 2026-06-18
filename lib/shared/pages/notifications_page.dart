@@ -55,12 +55,7 @@ class NotificationsPage extends StatelessWidget {
                   if (!notification.isRead) {
                     context.read<NotificationsCubit>().markAsRead(notification.id);
                   }
-                  // Navigate based on type if needed
-                  if (notification.type == 'booking_request') {
-                    context.push('/admin');
-                  } else {
-                    context.push('/history');
-                  }
+
                 },
               );
             },

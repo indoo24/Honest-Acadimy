@@ -102,177 +102,93 @@ class AppRouter {
         routes: [
           GoRoute(
             path: '/',
-            pageBuilder: (context, state) {
-              debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
-              return MaterialPage(
-                key: ValueKey('${state.pageKey}-splash'),
-                child: const SplashPage(),
-              );
-            },
+            builder: (context, state) => const SplashPage(),
           ),
           GoRoute(
             path: '/login',
-            pageBuilder: (context, state) {
-              debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
-              return MaterialPage(
-                key: ValueKey('${state.pageKey}-login'),
-                child: const LoginPage(),
-              );
-            },
+            builder: (context, state) => const LoginPage(),
           ),
           GoRoute(
             path: '/register',
-            pageBuilder: (context, state) {
-              debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
-              return MaterialPage(
-                key: ValueKey('${state.pageKey}-register'),
-                child: const RegisterPage(),
-              );
-            },
+            builder: (context, state) => const RegisterPage(),
           ),
           ShellRoute(
             navigatorKey: _shellNavigatorKey,
-            pageBuilder: (context, state, child) {
-              debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
-              return MaterialPage(
-                key: ValueKey('${state.pageKey}-shell'),
-                child: AppShell(location: state.uri.path, child: child),
-              );
+            builder: (context, state, child) {
+              return AppShell(location: state.uri.path, child: child);
             },
             routes: [
               GoRoute(
                 path: '/home',
-                pageBuilder: (context, state) {
-                  debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
-                  return MaterialPage(
-                    key: ValueKey('${state.pageKey}-home'),
-                    child: const HomePage(),
-                  );
-                },
+                builder: (context, state) => const HomePage(),
               ),
               GoRoute(
                 path: '/history',
-                pageBuilder: (context, state) {
-                  debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
-                  return MaterialPage(
-                    key: ValueKey('${state.pageKey}-history'),
-                    child: const BookingHistoryPage(),
-                  );
-                },
+                builder: (context, state) => const BookingHistoryPage(),
               ),
               GoRoute(
                 path: '/coaches',
-                pageBuilder: (context, state) {
-                  debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
-                  return MaterialPage(
-                    key: ValueKey('${state.pageKey}-coaches'),
-                    child: const CoachesScreen(),
-                  );
-                },
+                builder: (context, state) => const CoachesScreen(),
               ),
               GoRoute(
                 path: '/admin',
-                pageBuilder: (context, state) {
-                  debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
-                  return MaterialPage(
-                    key: ValueKey('${state.pageKey}-admin'),
-                    child: const AdminDashboardPage(),
-                  );
-                },
+                builder: (context, state) => const AdminDashboardPage(),
               ),
               GoRoute(
                 path: '/profile',
-                pageBuilder: (context, state) {
-                  debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
-                  return MaterialPage(
-                    key: ValueKey('${state.pageKey}-profile'),
-                    child: const ProfilePage(),
-                  );
-                },
+                builder: (context, state) => const ProfilePage(),
               ),
             ],
           ),
           GoRoute(
             parentNavigatorKey: _rootNavigatorKey,
             path: '/court/details',
-            pageBuilder: (context, state) {
-              debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
+            builder: (context, state) {
               final args = state.extra as CourtDetailsArgs?;
-              return MaterialPage(
-                key: ValueKey('${state.pageKey}-court-details-${args?.court.id ?? UniqueKey()}'),
-                child: CourtDetailsPage(args: args),
-              );
+              return CourtDetailsPage(args: args);
             },
           ),
           GoRoute(
             parentNavigatorKey: _rootNavigatorKey,
             path: '/booking/details',
-            pageBuilder: (context, state) {
-              debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
+            builder: (context, state) {
               final args = state.extra as BookingFlowArgs?;
-              return MaterialPage(
-                key: ValueKey('${state.pageKey}-booking-details-${args?.court.id ?? UniqueKey()}-${args?.slot.id ?? UniqueKey()}'),
-                child: BookingDetailsPage(args: args),
-              );
+              return BookingDetailsPage(args: args);
             },
           ),
           GoRoute(
             parentNavigatorKey: _rootNavigatorKey,
             path: '/booking/confirm',
-            pageBuilder: (context, state) {
-              debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
+            builder: (context, state) {
               final args = state.extra as BookingFlowArgs?;
-              return MaterialPage(
-                key: ValueKey('${state.pageKey}-booking-confirm-${args?.court.id ?? UniqueKey()}-${args?.slot.id ?? UniqueKey()}'),
-                child: BookingConfirmationPage(args: args),
-              );
+              return BookingConfirmationPage(args: args);
             },
           ),
           GoRoute(
             parentNavigatorKey: _rootNavigatorKey,
             path: '/booking/payment',
-            pageBuilder: (context, state) {
-              debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
+            builder: (context, state) {
               final args = state.extra as BookingPaymentArgs?;
-              return MaterialPage(
-                key: ValueKey('${state.pageKey}-booking-payment-${args?.court.id ?? UniqueKey()}-${args?.slot.id ?? UniqueKey()}'),
-                child: BookingPaymentPage(args: args),
-              );
+              return BookingPaymentPage(args: args);
             },
           ),
           GoRoute(
             parentNavigatorKey: _rootNavigatorKey,
             path: '/booking/success',
-            pageBuilder: (context, state) {
-              debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
-              return MaterialPage(
-                key: ValueKey('${state.pageKey}-booking-success-${UniqueKey()}'),
-                child: const BookingSuccessPage(),
-              );
-            },
+            builder: (context, state) => const BookingSuccessPage(),
           ),
           GoRoute(
             parentNavigatorKey: _rootNavigatorKey,
             path: '/coaches/details',
-            pageBuilder: (context, state) {
-              debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
+            builder: (context, state) {
               final args = state.extra as CoachDetailsArgs?;
-              return MaterialPage(
-                key: ValueKey('${state.pageKey}-coach-details-${args?.coachId ?? UniqueKey()}'),
-                child: CoachDetailsScreen(args: args),
-              );
+              return CoachDetailsScreen(args: args);
             },
           ),
           GoRoute(
             parentNavigatorKey: _rootNavigatorKey,
             path: '/notifications',
-            pageBuilder: (context, state) {
-              debugPrint('[ROUTE BUILD]\npath=${state.uri.path}\npageKey=${state.pageKey}');
-              return MaterialPage(
-                key: ValueKey('${state.pageKey}-notifications'),
-                child: const NotificationsPage(),
-              );
-            },
+            builder: (context, state) => const NotificationsPage(),
           ),
         ],
       );

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:intl/intl.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:honset_app/core/utils/date_time_extensions.dart';
@@ -74,7 +75,7 @@ class AdminCubit extends Cubit<AdminState> {
         await _notificationRepository.sendNotification(
           receiverId: booking.bookedByUserId!,
           title: 'Booking confirmed',
-          body: '${booking.courtName} at ${booking.startsAt.hour}:00',
+          body: '${booking.courtName} on ${DateFormat("EEE, MMM d 'at' h:mm a").format(booking.startsAt)}',
           type: 'booking_confirmed',
           bookingId: bookingId,
         );
@@ -94,7 +95,7 @@ class AdminCubit extends Cubit<AdminState> {
         await _notificationRepository.sendNotification(
           receiverId: booking.bookedByUserId!,
           title: 'Booking rejected',
-          body: '${booking.courtName} at ${booking.startsAt.hour}:00',
+          body: '${booking.courtName} on ${DateFormat("EEE, MMM d 'at' h:mm a").format(booking.startsAt)}',
           type: 'booking_rejected',
           bookingId: bookingId,
         );

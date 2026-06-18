@@ -5,6 +5,7 @@ import 'package:honset_app/features/booking/domain/repositories/booking_reposito
 import 'package:honset_app/features/booking/presentation/cubit/booking_state.dart';
 import 'package:honset_app/features/courts/domain/entities/court.dart';
 
+import 'package:honset_app/core/utils/date_time_extensions.dart';
 import 'package:honset_app/shared/repositories/notification_repository.dart';
 import 'package:honset_app/features/booking/domain/entities/booking.dart';
 
@@ -35,10 +36,10 @@ class BookingCubit extends Cubit<BookingState> {
         paymentMethod: paymentMethod,
       );
 
-      if (booking.status == BookingStatus.pendingPaymentReview) {
+      if (booking.status == BookingStatus.pendingPayment || booking.status == BookingStatus.pendingPaymentReview) {
         await _notificationRepository.notifyAdmins(
-          title: 'New booking request',
-          body: '${booking.coachName} booked ${booking.courtName} at ${booking.startsAt.hour}:00',
+          title: 'New Pending Booking! 🎾',
+          body: 'Coach ${booking.coachName} requested ${booking.courtName} on ${booking.startsAt.readableDate}.',
           bookingId: booking.id,
         );
       }

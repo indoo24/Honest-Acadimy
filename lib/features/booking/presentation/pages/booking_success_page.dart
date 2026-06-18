@@ -65,9 +65,19 @@ class _BookingSuccessPageState extends State<BookingSuccessPage>
                     ),
                     const SizedBox(height: 18),
                     Text(
-                      'Reservation locked in',
+                      'Booking pending review',
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(fontWeight: FontWeight.w900),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Waiting for admin confirmation',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                      textAlign: TextAlign.center,
                     ),
                     if (booking != null) ...[
                       const SizedBox(height: 8),
