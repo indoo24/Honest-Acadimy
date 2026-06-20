@@ -13,6 +13,7 @@ import 'package:honset_app/features/booking/domain/repositories/booking_reposito
 import 'package:honset_app/features/booking/data/repositories/court_availability_repository_impl.dart';
 import 'package:honset_app/features/booking/domain/repositories/court_availability_repository.dart';
 import 'package:honset_app/features/booking/domain/usecases/generate_slots.dart';
+import 'package:honset_app/features/booking/domain/usecases/validate_custom_booking.dart';
 import 'package:honset_app/features/booking/presentation/cubit/booking_cubit.dart';
 import 'package:honset_app/features/coaches/data/datasources/firestore_coach_data_source.dart';
 import 'package:honset_app/features/coaches/data/repositories/coach_repository_impl.dart';
@@ -61,6 +62,7 @@ Future<void> configureDependencies() async {
     () => getIt<CourtAvailabilityRepositoryImpl>(),
   );
   getIt.registerLazySingleton(() => const SlotGenerator());
+  getIt.registerLazySingleton(() => const ValidateCustomBooking());
   getIt.registerLazySingleton<BookingRepository>(
     () => BookingRepositoryImpl(
       remoteDataSource: getIt<FirestoreBookingDataSource>(),
