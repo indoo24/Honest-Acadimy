@@ -292,4 +292,53 @@ class FirestoreBookingDataSource {
     });
     debugPrint('[FirestoreBookingDataSource] cancelBooking($bookingId)');
   }
+
+  Future<void> rescheduleBooking({
+    required String bookingId,
+    required DateTime newStart,
+    required DateTime newEnd,
+  }) async {
+    _logBookingsQuery(
+      "collection('bookings').doc($bookingId).get() [reschedule]",
+    );
+    final bookingRef = _firestore.collection('bookings').doc(bookingId);
+    final bookingSnap = await bookingRef.get();
+    final data = bookingSnap.data();
+    if (data == null) throw StateError('Booking not found: $bookingId');
+
+    final courtId = data['courtId'] as String? ?? '';
+
+    // Check for overlapping active bookings on the same court.
+    _logBookingsQuery(
+      "collection('bookings').where(courtId == $courtId)"
+      ".where(startsAt < $newEnd).where(status in $_activeStatuses) [overlap check]",
+    );
+    final conflictSnapshot = await _firestore
+        .collection('bookings')
+        .where('courtId', isEqualTo: courtId)
+        .where('startsAt', isLessThan: Timestamp.fromDate(newEnd))
+        .where('status', whereIn: _activeStatuses)
+        .get();
+
+    for (final doc in conflictSnapshot.docs) {
+      if (doc.id == bookingId) continue; // skip the booking being rescheduled
+      final existingEnd = (doc.data()['endsAt'] as Timestamp?)?.toDate();
+      if (existingEnd != null && existingEnd.isAfter(newStart)) {
+        throw StateError(
+          'The selected time slot overlaps with an existing booking.',
+        );
+      }
+    }
+
+    await bookingRef.update({
+      'startsAt': Timestamp.fromDate(newStart),
+      'endsAt': Timestamp.fromDate(newEnd),
+      'status': 'pending_payment_review',
+      'paymentConfirmed': false,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    debugPrint(
+      '[FirestoreBookingDataSource] rescheduleBooking($bookingId) -> $newStart – $newEnd',
+    );
+  }
 }

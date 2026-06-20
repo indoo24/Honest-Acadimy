@@ -668,7 +668,7 @@ class _BookingSheetState extends State<_BookingSheet> {
               ),
               const SizedBox(height: 6),
               Text(
-                'Total: \$${widget.totalPrice.toStringAsFixed(2)}',
+                'Total: ${widget.totalPrice.toStringAsFixed(2)}LE',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: AppColors.squashGreen,

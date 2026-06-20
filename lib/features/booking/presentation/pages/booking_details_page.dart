@@ -58,7 +58,7 @@ class BookingDetailsPage extends StatelessWidget {
           _DetailTile(
             icon: Icons.payments_rounded,
             title: 'Court fee',
-            value: '\$${flow.court.pricePerHour.toStringAsFixed(0)}',
+            value: '${flow.court.pricePerHour.toStringAsFixed(0)}LE',
           ),
           const SizedBox(height: 12),
           Align(

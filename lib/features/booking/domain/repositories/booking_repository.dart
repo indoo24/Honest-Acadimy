@@ -39,4 +39,10 @@ abstract class BookingRepository {
   Future<void> rejectBooking(String bookingId);
 
   Future<void> cancelBooking(String bookingId);
+
+  Future<void> rescheduleBooking(
+    String bookingId,
+    DateTime newStart,
+    DateTime newEnd,
+  );
 }

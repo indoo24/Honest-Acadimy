@@ -16,21 +16,9 @@ class SlotGenerator {
     required List<Booking> bookings,
     DateTime? now,
   }) {
-    // ---------- DEBUG LOGGING START ----------
-    debugPrint('=== Slot Generation Debug ===');
-    debugPrint('[AVAIL] courtId: ${availability.courtId}');
-    debugPrint('[AVAIL] startHour: ${availability.startHour}');
-    debugPrint('[AVAIL] endHour: ${availability.endHour}');
-    debugPrint('[AVAIL] slotDurationMinutes: ${availability.slotDurationMinutes}');
-    debugPrint('[AVAIL] workingDays: ${availability.workingDays}');
-    debugPrint('[AVAIL] breaks: ${availability.breaks}');
-    if (availability.startHour >= availability.endHour) {
-      debugPrint('[WARN] Invalid hour range: startHour (${availability.startHour}) >= endHour (${availability.endHour})');
-    }
-    // ---------- DEBUG LOGGING END ------------
+    if (!availability.isActive) return const [];
 
-    if (!availability.isActive) return [];
-
+    // ---------- Day-of-week check ----------
     const weekdayMap = {
       1: 'monday',
       2: 'tuesday',
@@ -44,26 +32,17 @@ class SlotGenerator {
     final allowedDays = availability.workingDays
         .map((day) => day.toLowerCase().trim())
         .toSet();
-    final isDayAllowed = allowedDays.contains(weekdayName);
-    debugPrint('[DATE] weekday: $weekdayName (allowed: $isDayAllowed)');
-    if (!isDayAllowed) {
-      debugPrint('[SKIP] Weekday not allowed, returning empty slot list');
-      return [];
+    if (!allowedDays.contains(weekdayName)) {
+      if (kDebugMode) {
+        debugPrint('[SLOTS] ${availability.courtId}: $weekdayName not in working days');
+      }
+      return const [];
     }
 
-    final start = DateTime(
-      date.year,
-      date.month,
-      date.day,
-      availability.startHour,
-    );
-    final end = DateTime(
-      date.year,
-      date.month,
-      date.day,
-      availability.endHour,
-    );
-    if (!end.isAfter(start)) return [];
+    // ---------- Time range ----------
+    final start = DateTime(date.year, date.month, date.day, availability.startHour);
+    final end = DateTime(date.year, date.month, date.day, availability.endHour);
+    if (!end.isAfter(start)) return const [];
 
     final duration = Duration(minutes: availability.slotDurationMinutes);
     final activeBookings = bookings.where(_isBlockingBooking).toList();
@@ -71,7 +50,6 @@ class SlotGenerator {
     final nowTime = now ?? DateTime.now();
 
     var cursor = start;
-    int generatedCount = 0;
     while (cursor.isBefore(end)) {
       final slotEnd = cursor.add(duration);
       if (slotEnd.isAfter(end)) break;
@@ -82,14 +60,9 @@ class SlotGenerator {
         return cursor.isBefore(breakEnd) && slotEnd.isAfter(breakStart);
       });
 
-      final hourLabel = '${cursor.hour.toString().padLeft(2, '0')}:00';
-      debugPrint('[SLOT] Evaluating hour $hourLabel (inBreak: $inBreak)');
-
       if (!inBreak) {
         final booking = _findBooking(activeBookings, cursor, slotEnd);
         final isPast = slotEnd.isBefore(nowTime);
-        final excludedByBooking = booking != null;
-        debugPrint('[SLOT] excludedByBooking: $excludedByBooking');
         slots.add(
           BookingSlot(
             id: '${availability.courtId}_${cursor.millisecondsSinceEpoch}',
@@ -103,13 +76,13 @@ class SlotGenerator {
             bookedByUserId: booking?.bookedByUserId,
           ),
         );
-        generatedCount++;
-      } else {
-        debugPrint('[SLOT] Skipped due to break');
       }
       cursor = slotEnd;
     }
-    debugPrint('[RESULT] Generated slot count: $generatedCount');
+
+    if (kDebugMode) {
+      debugPrint('[SLOTS] ${availability.courtId}: ${slots.length} slots generated for $weekdayName');
+    }
 
     return slots;
   }

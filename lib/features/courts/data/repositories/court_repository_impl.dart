@@ -11,53 +11,37 @@ class CourtRepositoryImpl implements CourtRepository {
 
   @override
   Future<List<Court>> getCourts() async {
-    debugPrint('[🏛️ REPO] CourtRepository.getCourts() called');
-    debugPrint('[🏛️ REPO] Delegating to FirestoreCourtDataSource.getCourts()');
-    try {
-      final courts = await _remoteDataSource.getCourts();
-      debugPrint('[🏛️ REPO] ✅ getCourts() returned ${courts.length} courts');
-      for (final court in courts) {
-        debugPrint('[🏛️ REPO]   - id="${court.id}" name="${court.name}" active=${court.isActive} price=\$${court.pricePerHour}');
-      }
-      if (courts.isEmpty) {
-        debugPrint('[🏛️ REPO] ⚠️  WARNING: 0 courts returned!');
-        debugPrint('[🏛️ REPO] ⚠️  Possible causes:');
-        debugPrint('[🏛️ REPO] ⚠️   1. No documents in "courts" Firestore collection');
-        debugPrint('[🏛️ REPO] ⚠️   2. All courts have isActive=false');
-        debugPrint('[🏛️ REPO] ⚠️   3. Missing composite index (isActive ASC, name ASC)');
-        debugPrint('[🏛️ REPO] ⚠️   4. Field name mismatch (old docs use different field names)');
-        debugPrint('[🏛️ REPO] ⚠️   5. All courts have pricePerHour=null or invalid type');
-      }
-      return courts;
-    } catch (e) {
-      debugPrint('[🏛️ REPO] ❌ getCourts() FAILED: $e');
-      rethrow;
+    if (kDebugMode) {
+      debugPrint('[🏛️ REPO] CourtRepository.getCourts()');
     }
+    final courts = await _remoteDataSource.getCourts();
+    if (kDebugMode && courts.isEmpty) {
+      debugPrint('[🏛️ REPO] ⚠️ 0 courts returned — check Firestore data / indexes');
+    }
+    return courts;
   }
 
   @override
   Stream<List<Court>> watchCourts() {
-    debugPrint('[🏛️ REPO] CourtRepository.watchCourts() called');
-    debugPrint('[🏛️ REPO] Delegating to FirestoreCourtDataSource.watchCourts()');
+    if (kDebugMode) {
+      debugPrint('[🏛️ REPO] CourtRepository.watchCourts()');
+    }
     return _remoteDataSource.watchCourts();
   }
 
   @override
   Future<Court> getCourtById(String id) async {
-    debugPrint('[🏛️ REPO] CourtRepository.getCourtById("$id") called');
-    try {
-      final court = await _remoteDataSource.getCourtById(id);
-      debugPrint('[🏛️ REPO] ✅ getCourtById("$id") -> "$court"');
-      return court;
-    } catch (e) {
-      debugPrint('[🏛️ REPO] ❌ getCourtById("$id") FAILED: $e');
-      rethrow;
+    if (kDebugMode) {
+      debugPrint('[🏛️ REPO] CourtRepository.getCourtById("$id")');
     }
+    return _remoteDataSource.getCourtById(id);
   }
 
   @override
   Stream<Court> watchCourtById(String id) {
-    debugPrint('[🏛️ REPO] CourtRepository.watchCourtById("$id") called');
+    if (kDebugMode) {
+      debugPrint('[🏛️ REPO] CourtRepository.watchCourtById("$id")');
+    }
     return _remoteDataSource.watchCourtById(id);
   }
 }

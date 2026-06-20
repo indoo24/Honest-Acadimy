@@ -145,4 +145,17 @@ class BookingRepositoryImpl implements BookingRepository {
   Future<void> cancelBooking(String bookingId) async {
     await _remoteDataSource.cancelBooking(bookingId);
   }
+
+  @override
+  Future<void> rescheduleBooking(
+    String bookingId,
+    DateTime newStart,
+    DateTime newEnd,
+  ) async {
+    await _remoteDataSource.rescheduleBooking(
+      bookingId: bookingId,
+      newStart: newStart,
+      newEnd: newEnd,
+    );
+  }
 }

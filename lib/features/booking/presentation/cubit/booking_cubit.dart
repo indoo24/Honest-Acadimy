@@ -23,7 +23,7 @@ class BookingCubit extends Cubit<BookingState> {
     String? bookedByUserId,
     String? paymentMethod,
   }) async {
-    emit(state.copyWith(status: BookingActionStatus.loading));
+    emit(state.copyWith(status: BookingActionStatus.loading, lastAction: BookingLastAction.reserve));
     try {
       debugPrint('CUBIT COACH ID: $coachId');
       debugPrint('CUBIT COACH NAME: $coachName');
@@ -49,6 +49,7 @@ class BookingCubit extends Cubit<BookingState> {
           status: BookingActionStatus.success,
           latestBooking: booking,
           history: [booking, ...state.history],
+          lastAction: BookingLastAction.reserve,
         ),
       );
     } on Object catch (error) {
@@ -56,6 +57,7 @@ class BookingCubit extends Cubit<BookingState> {
         state.copyWith(
           status: BookingActionStatus.failure,
           message: error.toString(),
+          lastAction: BookingLastAction.reserve,
         ),
       );
     }
@@ -73,6 +75,118 @@ class BookingCubit extends Cubit<BookingState> {
         state.copyWith(
           status: BookingActionStatus.failure,
           message: error.toString(),
+        ),
+      );
+    }
+  }
+
+  Future<void> cancelBooking({
+    required String bookingId,
+    required String coachName,
+  }) async {
+    emit(state.copyWith(status: BookingActionStatus.loading, lastAction: BookingLastAction.cancel));
+    try {
+      await _repository.cancelBooking(bookingId);
+
+      await _notificationRepository.notifyAdmins(
+        title: 'Booking Cancelled ❌',
+        body: 'Coach $coachName has cancelled their booking.',
+        bookingId: bookingId,
+      );
+
+      // Update the local history list to reflect the cancellation.
+      final updatedHistory = state.history.map((b) {
+        if (b.id == bookingId) {
+          return Booking(
+            id: b.id,
+            courtId: b.courtId,
+            courtName: b.courtName,
+            coachId: b.coachId,
+            coachName: b.coachName,
+            startsAt: b.startsAt,
+            endsAt: b.endsAt,
+            status: BookingStatus.cancelled,
+            amount: b.amount,
+            qrPayload: b.qrPayload,
+            createdAt: b.createdAt,
+            bookedByUserId: b.bookedByUserId,
+            paymentMethod: b.paymentMethod,
+            paymentConfirmed: b.paymentConfirmed,
+          );
+        }
+        return b;
+      }).toList();
+
+      emit(
+        state.copyWith(
+          status: BookingActionStatus.success,
+          history: updatedHistory,
+          lastAction: BookingLastAction.cancel,
+        ),
+      );
+    } on Object catch (error) {
+      emit(
+        state.copyWith(
+          status: BookingActionStatus.failure,
+          message: error.toString(),
+          lastAction: BookingLastAction.cancel,
+        ),
+      );
+    }
+  }
+
+  Future<void> rescheduleBooking({
+    required String bookingId,
+    required String coachName,
+    required DateTime newStart,
+    required DateTime newEnd,
+  }) async {
+    emit(state.copyWith(status: BookingActionStatus.loading, lastAction: BookingLastAction.reschedule));
+    try {
+      await _repository.rescheduleBooking(bookingId, newStart, newEnd);
+
+      await _notificationRepository.notifyAdmins(
+        title: 'Booking Rescheduled 📅',
+        body: 'Coach $coachName requested a time change for their booking.',
+        bookingId: bookingId,
+      );
+
+      // Update the local history list to reflect the reschedule.
+      final updatedHistory = state.history.map((b) {
+        if (b.id == bookingId) {
+          return Booking(
+            id: b.id,
+            courtId: b.courtId,
+            courtName: b.courtName,
+            coachId: b.coachId,
+            coachName: b.coachName,
+            startsAt: newStart,
+            endsAt: newEnd,
+            status: BookingStatus.pendingPaymentReview,
+            amount: b.amount,
+            qrPayload: b.qrPayload,
+            createdAt: b.createdAt,
+            bookedByUserId: b.bookedByUserId,
+            paymentMethod: b.paymentMethod,
+            paymentConfirmed: false,
+          );
+        }
+        return b;
+      }).toList();
+
+      emit(
+        state.copyWith(
+          status: BookingActionStatus.success,
+          history: updatedHistory,
+          lastAction: BookingLastAction.reschedule,
+        ),
+      );
+    } on Object catch (error) {
+      emit(
+        state.copyWith(
+          status: BookingActionStatus.failure,
+          message: error.toString(),
+          lastAction: BookingLastAction.reschedule,
         ),
       );
     }

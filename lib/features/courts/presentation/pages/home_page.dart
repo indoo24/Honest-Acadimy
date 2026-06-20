@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -40,25 +41,34 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CourtsCubit, CourtsState>(
-      builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const AppLogo(size: 40),
-            actions: [
-              const NotificationBell(),
-              IconButton(
-                tooltip: 'Refresh',
-                onPressed: () => context.read<CourtsCubit>().loadDashboard(),
-                icon: const Icon(Icons.refresh_rounded),
-              ),
-              const SizedBox(width: 8),
-            ],
+    // AppBar is outside BlocBuilder — NotificationBell has its own Bloc,
+    // and the refresh button doesn't depend on CourtsState.
+    return Scaffold(
+      appBar: AppBar(
+        title: const AppLogo(size: 40),
+        actions: [
+          const NotificationBell(),
+          IconButton(
+            tooltip: 'Refresh',
+            onPressed: () => context.read<CourtsCubit>().refresh(),
+            icon: const Icon(Icons.refresh_rounded),
           ),
-          body: switch (state.status) {
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: BlocBuilder<CourtsCubit, CourtsState>(
+        buildWhen: (previous, current) {
+          // Only rebuild when meaningful state changes occur.
+          return previous.status != current.status ||
+              previous.courts != current.courts ||
+              previous.slotsByCourt != current.slotsByCourt ||
+              previous.selectedDate != current.selectedDate;
+        },
+        builder: (context, state) {
+          return switch (state.status) {
             CourtsStatus.failure => ErrorStateView(
               message: state.message ?? 'Could not load courts.',
-              onRetry: () => context.read<CourtsCubit>().loadDashboard(),
+              onRetry: () => context.read<CourtsCubit>().refresh(),
             ),
             CourtsStatus.loading ||
             CourtsStatus.initial => const _DashboardSkeleton(),
@@ -66,9 +76,9 @@ class _HomePageState extends State<HomePage> {
               key: ValueKey('content-${state.courts.length}'),
               state: state,
             ),
-          },
-        );
-      },
+          };
+        },
+      ),
     );
   }
 }
@@ -154,29 +164,43 @@ class _DashboardContent extends StatelessWidget {
   }
 }
 
-class _DateStrip extends StatelessWidget {
+// ---------------------------------------------------------------------------
+// Date strip — caches the generated day list to avoid re-computation.
+// ---------------------------------------------------------------------------
+
+class _DateStrip extends StatefulWidget {
   const _DateStrip({required this.selectedDate});
 
   final DateTime selectedDate;
 
   @override
+  State<_DateStrip> createState() => _DateStripState();
+}
+
+class _DateStripState extends State<_DateStrip> {
+  late final List<DateTime> _days;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _days = List.generate(14, (index) => now.add(Duration(days: index)));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final days = List.generate(
-      14,
-      (index) => DateTime.now().add(Duration(days: index)),
-    );
     return SizedBox(
       height: 86,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: days.length,
+        itemCount: _days.length,
         separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
-          final day = days[index];
-          final selected = day.isSameDate(selectedDate);
+          final day = _days[index];
+          final selected = day.isSameDate(widget.selectedDate);
           return InkWell(
             borderRadius: BorderRadius.circular(8),
-            onTap: () => context.read<CourtsCubit>().loadDashboard(date: day),
+            onTap: () => context.read<CourtsCubit>().selectDate(day),
             child: Container(
               width: 68,
               padding: const EdgeInsets.all(8),
@@ -225,6 +249,10 @@ class _DateStrip extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Court card — uses CachedNetworkImage when imageUrl is available.
+// ---------------------------------------------------------------------------
+
 class _CourtCard extends StatelessWidget {
   const _CourtCard({
     required this.court,
@@ -254,25 +282,7 @@ class _CourtCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.squashGreen.withValues(alpha: 0.3),
-                          AppColors.clubNavy.withValues(alpha: 0.6),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.sports_tennis_rounded,
-                        size: 64,
-                        color: Colors.white38,
-                      ),
-                    ),
-                  ),
+                  _CourtImage(imageUrl: court.imageUrl),
                   Positioned(
                     left: 16,
                     top: 16,
@@ -296,7 +306,7 @@ class _CourtCard extends StatelessWidget {
                           vertical: 8,
                         ),
                         child: Text(
-                          '\$${court.pricePerHour.toStringAsFixed(0)} / hour',
+                          '${court.pricePerHour.toStringAsFixed(0)}LE / hour',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,
@@ -368,6 +378,63 @@ class _CourtCard extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Court image — uses CachedNetworkImage with memory-constrained decoding.
+// ---------------------------------------------------------------------------
+
+class _CourtImage extends StatelessWidget {
+  const _CourtImage({required this.imageUrl});
+
+  final String? imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    if (imageUrl == null || imageUrl!.isEmpty) {
+      return const _CourtImagePlaceholder();
+    }
+
+    return CachedNetworkImage(
+      imageUrl: imageUrl!,
+      memCacheWidth: 400,
+      memCacheHeight: 225,
+      fit: BoxFit.cover,
+      placeholder: (_, __) => const _CourtImagePlaceholder(),
+      errorWidget: (_, __, ___) => const _CourtImagePlaceholder(),
+    );
+  }
+}
+
+class _CourtImagePlaceholder extends StatelessWidget {
+  const _CourtImagePlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.squashGreen.withValues(alpha: 0.3),
+            AppColors.clubNavy.withValues(alpha: 0.6),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.sports_tennis_rounded,
+          size: 64,
+          color: Colors.white38,
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Slot timeline — optimised horizontal list.
+// ---------------------------------------------------------------------------
+
 class _SlotTimeline extends StatelessWidget {
   const _SlotTimeline({
     required this.court,
@@ -386,6 +453,8 @@ class _SlotTimeline extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: slots.length,
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: false,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final slot = slots[index];
