@@ -26,6 +26,8 @@ import 'package:honset_app/features/courts/presentation/cubit/courts_cubit.dart'
 import 'package:honset_app/features/profile/presentation/cubit/theme_cubit.dart';
 import 'package:honset_app/shared/repositories/notification_repository.dart';
 import 'package:honset_app/shared/cubit/notifications_cubit.dart';
+import 'package:honset_app/shared/data/firestore_settings_data_source.dart';
+import 'package:honset_app/shared/cubit/settings_cubit.dart';
 
 final getIt = GetIt.instance;
 
@@ -49,6 +51,7 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton(() => CourtAvailabilityRepositoryImpl(firestore));
   getIt.registerLazySingleton(() => FirestoreCoachDataSource(firestore));
   getIt.registerLazySingleton(() => NotificationRepository(firestore));
+  getIt.registerLazySingleton(() => FirestoreSettingsDataSource(firestore));
 
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDataSource: getIt<FirebaseAuthDataSource>()),
@@ -89,5 +92,6 @@ Future<void> configureDependencies() async {
   getIt.registerFactory(() => CoachesCubit(getIt<CoachRepository>()));
   getIt.registerFactory(() => AdminCubit(getIt<BookingRepository>(), getIt<NotificationRepository>()));
   getIt.registerFactory(() => NotificationsCubit(getIt<NotificationRepository>()));
+  getIt.registerFactory(() => SettingsCubit(getIt<FirestoreSettingsDataSource>()));
   getIt.registerLazySingleton(ThemeCubit.new);
 }

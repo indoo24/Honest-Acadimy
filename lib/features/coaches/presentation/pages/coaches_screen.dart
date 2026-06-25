@@ -59,36 +59,22 @@ class _CoachesScreenState extends State<CoachesScreen> {
           }
           return LayoutBuilder(
             builder: (context, constraints) {
-              final isGrid = constraints.maxWidth >= 760;
+              final width = constraints.maxWidth;
+              final columns = width >= 1180 ? 3 : 2;
               final padding = EdgeInsets.symmetric(
-                horizontal: isGrid ? 24 : 18,
+                horizontal: width >= 760 ? 24 : 14,
                 vertical: 16,
               );
-              if (!isGrid) {
-                return ListView.separated(
-                  key: const ValueKey('coach-list'),
-                  padding: padding,
-                  itemCount: state.coaches.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 16),
-                  itemBuilder: (context, index) => _CoachCard(
-                    coach: state.coaches[index],
-                    onViewProfile: () => _openCoach(context, state.coaches[index]),
-                  ),
-                );
-              }
-              final columns = constraints.maxWidth >= 1180 ? 3 : 2;
-              final itemWidth = (constraints.maxWidth - padding.horizontal -
-                      (columns - 1) * 16) /
-                  columns;
+
               return GridView.builder(
                 key: const ValueKey('coach-grid'),
                 padding: padding,
                 itemCount: state.coaches.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: columns,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  mainAxisExtent: itemWidth.clamp(320, 420).toDouble(),
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 14,
+                  childAspectRatio: 0.62,
                 ),
                 itemBuilder: (context, index) => _CoachCard(
                   coach: state.coaches[index],
@@ -121,10 +107,11 @@ class _CoachCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Coach image with availability badge ──
           Stack(
             children: [
               AspectRatio(
@@ -137,75 +124,107 @@ class _CoachCard extends StatelessWidget {
                     placeholder: (context, url) => Container(
                       color: AppColors.clubNavy.withValues(alpha: .08),
                       child: const Center(
-                        child: Icon(Icons.person_rounded, size: 42),
+                        child: Icon(Icons.person_rounded, size: 32),
                       ),
                     ),
                     errorWidget: (context, url, error) => Container(
                       color: AppColors.clubNavy.withValues(alpha: .08),
                       child: const Center(
-                        child: Icon(Icons.person_rounded, size: 42),
+                        child: Icon(Icons.person_rounded, size: 32),
                       ),
                     ),
                   ),
                 ),
               ),
               Positioned(
-                right: 12,
-                top: 12,
+                right: 8,
+                top: 8,
                 child: _AvailabilityPill(isActive: coach.isActive),
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  coach.name,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  coach.specialty,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.squashGreen,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  coach.description ?? coach.bio,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    _MetaChip(
-                      icon: Icons.timer_outlined,
-                      label: '${coach.yearsExperience} yrs',
-                    ),
-                    const SizedBox(width: 8),
-                    _MetaChip(
-                      icon: Icons.star_rounded,
-                      label: coach.rating.toStringAsFixed(1),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: onViewProfile,
-                    icon: const Icon(Icons.visibility_rounded),
-                    label: const Text('View profile'),
+
+          // ── Card body ──
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Name
+                  Text(
+                    coach.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 14,
+                        ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 2),
+
+                  // Specialty
+                  Text(
+                    coach.specialty,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.squashGreen,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Description
+                  Text(
+                    coach.description ?? coach.bio,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontSize: 11,
+                        ),
+                  ),
+
+                  const Spacer(),
+
+                  // Meta chips row
+                  Row(
+                    children: [
+                      _MetaChip(
+                        icon: Icons.timer_outlined,
+                        label: '${coach.yearsExperience} yrs',
+                      ),
+                      const SizedBox(width: 6),
+                      _MetaChip(
+                        icon: Icons.star_rounded,
+                        label: coach.rating.toStringAsFixed(1),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  // View profile button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 32,
+                    child: FilledButton(
+                      onPressed: onViewProfile,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      child: const FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text('View profile'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -229,19 +248,23 @@ class _AvailabilityPill extends StatelessWidget {
         border: Border.all(color: color.withValues(alpha: .4)),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               isActive ? Icons.check_circle_rounded : Icons.schedule_rounded,
-              size: 14,
+              size: 10,
               color: color,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 4),
             Text(
               isActive ? 'Available' : 'Unavailable',
-              style: TextStyle(color: color, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w700,
+                fontSize: 9,
+              ),
             ),
           ],
         ),
@@ -264,13 +287,19 @@ class _MetaChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(99),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 14),
-            const SizedBox(width: 6),
-            Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+            Icon(icon, size: 11),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 11,
+              ),
+            ),
           ],
         ),
       ),
@@ -283,14 +312,17 @@ class _CoachesSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(20),
+    return GridView.count(
+      padding: const EdgeInsets.all(14),
+      crossAxisCount: 2,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 14,
+      childAspectRatio: 0.62,
       children: const [
-        SkeletonBox(height: 220),
-        SizedBox(height: 16),
-        SkeletonBox(height: 220),
-        SizedBox(height: 16),
-        SkeletonBox(height: 220),
+        SkeletonBox(height: double.infinity),
+        SkeletonBox(height: double.infinity),
+        SkeletonBox(height: double.infinity),
+        SkeletonBox(height: double.infinity),
       ],
     );
   }

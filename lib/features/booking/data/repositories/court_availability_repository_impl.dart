@@ -30,7 +30,9 @@ class CourtAvailabilityRepositoryImpl implements CourtAvailabilityRepository {
             courtId: model.courtId,
             workingDays: model.workingDays,
             startHour: model.startHour,
+            startMinute: model.startMinute,
             endHour: model.endHour,
+            endMinute: model.endMinute,
             slotDurationMinutes: model.slotDurationMinutes,
             breaks: model.breaks
                 .map(
@@ -79,7 +81,9 @@ class CourtAvailabilityRepositoryImpl implements CourtAvailabilityRepository {
       courtId: model.courtId,
       workingDays: model.workingDays,
       startHour: model.startHour,
+      startMinute: model.startMinute,
       endHour: model.endHour,
+      endMinute: model.endMinute,
       slotDurationMinutes: model.slotDurationMinutes,
       breaks: model.breaks
           .map(

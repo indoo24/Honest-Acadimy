@@ -13,6 +13,7 @@ import 'package:honset_app/features/coaches/presentation/cubit/coaches_cubit.dar
 import 'package:honset_app/features/courts/presentation/cubit/courts_cubit.dart';
 import 'package:honset_app/features/profile/presentation/cubit/theme_cubit.dart';
 import 'package:honset_app/shared/cubit/notifications_cubit.dart';
+import 'package:honset_app/shared/cubit/settings_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,6 +60,7 @@ class _HonsetAppState extends State<HonsetApp> {
         BlocProvider(create: (_) => getIt<CoachesCubit>()),
         BlocProvider(create: (_) => getIt<AdminCubit>()),
         BlocProvider(create: (_) => getIt<NotificationsCubit>()),
+        BlocProvider(create: (_) => getIt<SettingsCubit>()),
         BlocProvider<ThemeCubit>.value(value: _themeCubit),
       ],
       child: BlocListener<AuthCubit, AuthState>(

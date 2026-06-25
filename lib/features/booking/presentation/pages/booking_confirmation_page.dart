@@ -111,7 +111,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       _SummaryRow(
                         label: 'Total',
                         value:
-                            '\$${flow.court.pricePerHour.toStringAsFixed(0)}',
+                            '${flow.court.pricePerHour.toStringAsFixed(0)}LE',
                       ),
                     ],
                   ),
@@ -130,15 +130,22 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       coaches: state.coaches,
                     );
                   }
-                  return DropdownButtonFormField<String>(
-                    key: ValueKey(
-                      'coach-dropdown-${_selectedCoachId ?? 'none'}-${state.coaches.length}',
-                    ),
-                    initialValue: selectedCoach?.id,
-                    decoration: const InputDecoration(
-                      labelText: 'Coach',
-                      prefixIcon: Icon(Icons.sports_rounded),
-                    ),
+                  return SizedBox(
+                      width: 180, // 👈 حددنا له العرض هنا بره عشان نلجم الـ 26 بكسل الزيادة
+                      child: DropdownButtonFormField<String>(
+                        key: ValueKey(
+                          'coach-dropdown-${_selectedCoachId ?? 'none'}-${state.coaches.length}',
+                        ),
+                        initialValue: selectedCoach?.id,
+
+                        // 👈 السطر ده أساسي عشان يخلي النص والأيقونة يلتزموا بالـ 180 بكسل
+                        isExpanded: true,
+
+                        decoration: const InputDecoration(
+                          labelText: 'Coach',
+                          prefixIcon: Icon(Icons.sports_rounded),
+                        ),
+                        // باقي الكود بتاعك (items, onChanged...) زي ما هو تحت الديكوراسيون
                     items: [
                       for (final coach in state.coaches)
                         DropdownMenuItem(
@@ -197,7 +204,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                               _selectedCoachId = match.id;
                             });
                           },
-                  );
+                  ));
                 },
               ),
               const SizedBox(height: 16),

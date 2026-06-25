@@ -689,74 +689,78 @@ class _BookingSheetState extends State<_BookingSheet> {
                   }
                   return ConstrainedBox(
                     constraints: const BoxConstraints(minHeight: 56),
-                    child: DropdownButtonFormField<String>(
-                      key: ValueKey(
-                        'coach-dropdown-${_selectedCoachId ?? 'none'}-${coaches.length}',
-                      ),
-                      initialValue: selectedCoach?.id,
-                      decoration: const InputDecoration(
-                        labelText: 'Coach',
-                        prefixIcon: Icon(Icons.sports_rounded),
-                      ),
-                      items: [
-                        for (final coach in coaches)
-                          DropdownMenuItem(
-                            value: coach.id,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                CircleAvatar(
-                                  radius: 14,
-                                  backgroundImage:
-                                      coach.imageUrl?.isNotEmpty == true
-                                          ? NetworkImage(coach.imageUrl!)
-                                          : null,
-                                  child: coach.imageUrl?.isNotEmpty == true
-                                      ? null
-                                      : const Icon(Icons.person, size: 14),
-                                ),
-                                const SizedBox(width: 10),
-                                Flexible(
-                                  fit: FlexFit.loose,
-                                  child: Text(
-                                    coach.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(),
+                      child: DropdownButtonFormField<String>(
+                        key: ValueKey(
+                          'coach-dropdown-${_selectedCoachId ?? 'none'}-${coaches.length}',
+                        ),
+                        isExpanded: true,
+                        initialValue: selectedCoach?.id,
+                        decoration: const InputDecoration(
+                          labelText: 'Coach',
+                          prefixIcon: Icon(Icons.sports_rounded),
+                        ),
+                        items: [
+                          for (final coach in coaches)
+                            DropdownMenuItem(
+                              value: coach.id,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 14,
+                                    backgroundImage:
+                                        coach.imageUrl?.isNotEmpty == true
+                                            ? NetworkImage(coach.imageUrl!)
+                                            : null,
+                                    child: coach.imageUrl?.isNotEmpty == true
+                                        ? null
+                                        : const Icon(Icons.person, size: 14),
                                   ),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${coach.yearsExperience}y',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(fontWeight: FontWeight.w700),
-                                ),
-                              ],
+                                  const SizedBox(width: 10),
+                                  Flexible(
+                                    fit: FlexFit.loose,
+                                    child: Text(
+                                      coach.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${coach.yearsExperience}y',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(fontWeight: FontWeight.w700),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                      ],
-                      onChanged: state.status == CoachesStatus.loading
-                          ? null
-                          : (value) {
-                              final match = _findCoachById(coaches, value);
-                              if (match == null) {
-                                _reportInvalidCoachSelection(
-                                  selectedCoachId: value,
-                                  coaches: coaches,
+                        ],
+                        onChanged: state.status == CoachesStatus.loading
+                            ? null
+                            : (value) {
+                                final match = _findCoachById(coaches, value);
+                                if (match == null) {
+                                  _reportInvalidCoachSelection(
+                                    selectedCoachId: value,
+                                    coaches: coaches,
+                                  );
+                                  return;
+                                }
+                                debugPrint('SELECTED COACH ID: ${match.id}');
+                                debugPrint('SELECTED COACH NAME: ${match.name}');
+                                debugPrint(
+                                  '[COACH SELECTED]\nid=${match.id}\nname=${match.name}',
                                 );
-                                return;
-                              }
-                              debugPrint('SELECTED COACH ID: ${match.id}');
-                              debugPrint('SELECTED COACH NAME: ${match.name}');
-                              debugPrint(
-                                '[COACH SELECTED]\nid=${match.id}\nname=${match.name}',
-                              );
-                              setState(() {
-                                _selectedCoach = match;
-                                _selectedCoachId = match.id;
-                              });
-                            },
+                                setState(() {
+                                  _selectedCoach = match;
+                                  _selectedCoachId = match.id;
+                                });
+                              },
+                      ),
                     ),
                   );
                 },

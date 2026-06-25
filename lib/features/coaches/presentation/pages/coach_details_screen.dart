@@ -39,9 +39,7 @@ class CoachDetailsScreen extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        debugPrint(
-          '[COACH PAGE]\ncoachId=${coach.id}\nweeklyAvailability=${_weeklyAvailabilityLog(coach.weeklyAvailability)}',
-        );
+        debugPrint('[COACH PAGE]\ncoachId=${coach.id}');
         return Scaffold(
           body: CustomScrollView(
             slivers: [
@@ -163,30 +161,17 @@ class CoachDetailsScreen extends StatelessWidget {
     return FirebaseFirestore.instance
         .collection('bookings')
         .where('coachId', isEqualTo: coachId)
-        .orderBy('startsAt')
+        .orderBy('startsAt', descending: true)
         .snapshots()
         .map((snapshot) {
-          final now = DateTime.now();
           final bookings = snapshot.docs
               .map(BookingModel.fromFirestore)
-              .where((booking) => !booking.startsAt.isBefore(now))
               .toList();
           debugPrint(
             '[COACH BOOKINGS]\ncount=${bookings.length}\ncoachId=$coachId',
           );
           return bookings;
         });
-  }
-
-  static String _weeklyAvailabilityLog(
-    Map<String, WeeklyAvailabilityRange> weeklyAvailability,
-  ) {
-    return weeklyAvailability.map((day, range) {
-      return MapEntry(day, {
-        'startHour': range.startHour,
-        'endHour': range.endHour,
-      });
-    }).toString();
   }
 }
 
@@ -388,6 +373,7 @@ class _WeeklyAvailabilityRow extends StatelessWidget {
     return value[0].toUpperCase() + value.substring(1).toLowerCase();
   }
 }
+
 
 class _CoachReservationsCard extends StatelessWidget {
   const _CoachReservationsCard({required this.bookings});

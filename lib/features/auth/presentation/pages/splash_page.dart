@@ -159,7 +159,7 @@ class _SplashPageState extends State<SplashPage>
                       ),
                       child: ClipOval(
                         child: Image.asset(
-                          'assets/images/icon_foreground.png',
+                          'assets/images/icon.png',
                           width: logoSize,
                           height: logoSize,
                           fit: BoxFit.cover,

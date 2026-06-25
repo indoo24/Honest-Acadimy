@@ -5,7 +5,9 @@ class CourtAvailability extends Equatable {
   final String courtId;
   final List<String> workingDays;
   final int startHour;
+  final int startMinute;
   final int endHour;
+  final int endMinute;
   final int slotDurationMinutes;
   final List<BreakPeriod> breaks;
   final bool isActive;
@@ -14,14 +16,16 @@ class CourtAvailability extends Equatable {
     required this.courtId,
     required this.workingDays,
     required this.startHour,
+    this.startMinute = 0,
     required this.endHour,
+    this.endMinute = 0,
     required this.slotDurationMinutes,
     required this.breaks,
     required this.isActive,
   });
 
   @override
-  List<Object?> get props => [courtId, workingDays, startHour, endHour, slotDurationMinutes, breaks, isActive];
+  List<Object?> get props => [courtId, workingDays, startHour, startMinute, endHour, endMinute, slotDurationMinutes, breaks, isActive];
 }
 
 class BreakPeriod extends Equatable {

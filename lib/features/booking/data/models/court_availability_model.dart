@@ -4,7 +4,9 @@ class CourtAvailabilityModel {
   final String courtId;
   final List<String> workingDays; // e.g., ["monday", "tuesday"]
   final int startHour; // 0-23
+  final int startMinute; // 0-59
   final int endHour; // exclusive, 0-24
+  final int endMinute; // 0-59
   final int slotDurationMinutes;
   final List<BreakPeriod> breaks;
   final bool isActive;
@@ -13,7 +15,9 @@ class CourtAvailabilityModel {
     required this.courtId,
     required this.workingDays,
     required this.startHour,
+    this.startMinute = 0,
     required this.endHour,
+    this.endMinute = 0,
     required this.slotDurationMinutes,
     required this.breaks,
     required this.isActive,
@@ -25,7 +29,9 @@ class CourtAvailabilityModel {
       courtId: data['courtId'] as String,
       workingDays: List<String>.from(data['workingDays'] ?? []),
       startHour: data['startHour'] as int,
+      startMinute: (data['startMinute'] as int?) ?? 0,
       endHour: data['endHour'] as int,
+      endMinute: (data['endMinute'] as int?) ?? 0,
       slotDurationMinutes: data['slotDurationMinutes'] as int,
       breaks: (data['breaks'] as List<dynamic>? ?? [])
           .map((e) => BreakPeriod.fromMap(e as Map<String, dynamic>))
@@ -38,7 +44,9 @@ class CourtAvailabilityModel {
         'courtId': courtId,
         'workingDays': workingDays,
         'startHour': startHour,
+        'startMinute': startMinute,
         'endHour': endHour,
+        'endMinute': endMinute,
         'slotDurationMinutes': slotDurationMinutes,
         'breaks': breaks.map((b) => b.toMap()).toList(),
         'isActive': isActive,

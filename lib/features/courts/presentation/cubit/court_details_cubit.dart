@@ -88,13 +88,13 @@ class CourtDetailsCubit extends Cubit<CourtDetailsState> {
     final slots = <BookingSlot>[];
     final now = DateTime.now();
 
-    // Start at exactly 11:00 AM
+    // Start at exactly 11:15 AM
     var currentStart = DateTime(
       targetDate.year,
       targetDate.month,
       targetDate.day,
       11,
-      0,
+      15,
     );
 
     final endOfDay = DateTime(

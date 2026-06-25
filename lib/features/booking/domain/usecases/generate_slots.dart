@@ -40,8 +40,8 @@ class SlotGenerator {
     }
 
     // ---------- Time range ----------
-    final start = DateTime(date.year, date.month, date.day, availability.startHour);
-    final end = DateTime(date.year, date.month, date.day, availability.endHour);
+    final start = DateTime(date.year, date.month, date.day, availability.startHour, availability.startMinute);
+    final end = DateTime(date.year, date.month, date.day, availability.endHour, availability.endMinute);
     if (!end.isAfter(start)) return const [];
 
     final duration = Duration(minutes: availability.slotDurationMinutes);
