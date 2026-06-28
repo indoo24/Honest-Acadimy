@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:honset_app/features/auth/domain/entities/app_user.dart';
 import 'package:honset_app/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:honset_app/features/profile/presentation/cubit/theme_cubit.dart';
+import 'package:honset_app/core/locale/locale_cubit.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = context.watch<AuthCubit>().state.user;
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(title: Text(l10n.profile)),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -33,7 +36,7 @@ class ProfilePage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          user?.name ?? 'Guest Member',
+                          user?.name ?? l10n.guestMember,
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(fontWeight: FontWeight.w900),
                         ),
@@ -41,6 +44,7 @@ class ProfilePage extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text(
                           _membershipLabel(
+                            l10n,
                             user?.membershipTier ?? MembershipTier.guest,
                           ),
                         ),
@@ -60,23 +64,48 @@ class ProfilePage extends StatelessWidget {
                   onChanged: (enabled) =>
                       context.read<ThemeCubit>().toggleDarkMode(enabled),
                   secondary: const Icon(Icons.dark_mode_outlined),
-                  title: const Text('Dark mode'),
+                  title: Text(l10n.darkMode),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.workspace_premium_rounded),
-                  title: const Text('Membership status'),
+                  title: Text(l10n.membershipStatus),
                   subtitle: Text(
                     _membershipLabel(
+                      l10n,
                       user?.membershipTier ?? MembershipTier.guest,
                     ),
                   ),
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  leading: const Icon(Icons.language_rounded),
+                  title: Text(l10n.language),
+                  trailing: DropdownButton<String>(
+                    value: context.watch<LocaleCubit>().state.locale.languageCode,
+                    underline: const SizedBox(),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'en',
+                        child: Text(l10n.english, style: Theme.of(context).textTheme.bodyMedium),
+                      ),
+                      DropdownMenuItem(
+                        value: 'ar',
+                        child: Text(l10n.arabic, style: Theme.of(context).textTheme.bodyMedium),
+                      ),
+                    ],
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        context.read<LocaleCubit>().changeLanguage(newValue);
+                      }
+                    },
+                  ),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   leading: const Icon(Icons.notifications_active_outlined),
-                  title: const Text('Push notifications'),
-                  subtitle: const Text('Firebase Cloud Messaging ready'),
+                  title: Text(l10n.pushNotifications),
+                  subtitle: Text(l10n.fcmReady),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () {},
                 ),
@@ -91,19 +120,19 @@ class ProfilePage extends StatelessWidget {
               context.go('/login');
             },
             icon: const Icon(Icons.logout_rounded),
-            label: const Text('Sign out'),
+            label: Text(l10n.signOut),
           ),
         ],
       ),
     );
   }
 
-  String _membershipLabel(MembershipTier tier) {
+  String _membershipLabel(AppLocalizations l10n, MembershipTier tier) {
     return switch (tier) {
-      MembershipTier.guest => 'Guest access',
-      MembershipTier.standard => 'Standard member',
-      MembershipTier.premium => 'Premium member',
-      MembershipTier.admin => 'Club administrator',
+      MembershipTier.guest => l10n.guestAccess,
+      MembershipTier.standard => l10n.standardMember,
+      MembershipTier.premium => l10n.premiumMember,
+      MembershipTier.admin => l10n.clubAdministrator,
     };
   }
 }

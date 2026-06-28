@@ -1,0 +1,263 @@
+{
+  "@@locale": "en",
+
+  "appName": "Honset Squash",
+  "clubName": "Honset Sports Club",
+
+  "welcomeBack": "Welcome back",
+  "loginSubtitle": "Reserve courts, manage sessions, and keep every rally on schedule.",
+  "email": "Email",
+  "password": "Password",
+  "signIn": "Sign in",
+  "continueAsGuest": "Continue as guest",
+  "createMembershipAccount": "Create a membership account",
+  "loginFailed": "Login failed",
+  "heroTitle": "Premium court access with live availability.",
+  "heroSubtitle": "Two championship courts, coach-led sessions, QR check-in, and admin operations in one focused product.",
+
+  "createAccount": "Create account",
+  "fullName": "Full name",
+  "createAccountButton": "Create account",
+  "alreadyHaveAccount": "Already have an account? Sign in",
+  "registrationFailed": "Registration failed",
+  "clubMember": "Club Member",
+
+  "honestAcademy": "HONEST ACADEMY",
+  "fitnessSquashAcademy": "FITNESS & SQUASH ACADEMY",
+
+  "home": "Home",
+  "coaches": "Coaches",
+  "bookings": "Bookings",
+  "admin": "Admin",
+  "profile": "Profile",
+
+  "refresh": "Refresh",
+  "courtReservations": "Court reservations",
+  "liveAvailability": "Live availability across all squash courts.",
+  "couldNotLoadCourts": "Could not load courts.",
+  "viewDetails": "View details",
+  "bookTime": "Book {time}",
+  "@bookTime": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "pricePerHour": "{price}LE / hour",
+  "@pricePerHour": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+
+  "courtNotSelected": "Court not selected",
+  "returnToBookingDashboard": "Return to the booking dashboard and choose a court.",
+  "bookedTimes": "Booked times",
+  "selectBookingTime": "Select your booking time",
+  "noSlotsAvailable": "No slots available for this date.",
+  "noBookingsAllAvailable": "No bookings yet — all times available!",
+  "failedToLoadBookings": "Failed to load bookings.",
+  "selectTimeSlot": "Select a time slot",
+  "bookTimeRange": "Book {start} – {end}",
+  "@bookTimeRange": {
+    "placeholders": {
+      "start": { "type": "String" },
+      "end": { "type": "String" }
+    }
+  },
+  "unavailable": "Unavailable",
+  "duration": "Duration",
+  "rate": "Rate",
+  "total": "Total",
+  "pricePerHourRate": "${price} / hour",
+  "@pricePerHourRate": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+
+  "reserveCourt": "Reserve court",
+  "bookingCreated": "Booking created",
+  "bookingFailed": "Booking failed",
+  "confirmBookingTitle": "Confirm booking",
+  "confirmingBooking": "Confirming...",
+  "confirmBookingButton": "Confirm booking",
+  "coach": "Coach",
+  "invalidCoachSelection": "Invalid coach selection. Please choose again.",
+  "coachSelectionMismatch": "Coach selection mismatch. Please choose again.",
+
+  "noBookingSelected": "No booking selected",
+  "returnToDashboardSlot": "Return to the dashboard and choose a slot.",
+  "reservationSummary": "Reservation summary",
+  "court": "Court",
+  "date": "Date",
+  "paymentMethod": "Payment Method",
+  "cash": "Cash",
+  "instaPay": "InstaPay",
+  "confirmReservation": "Confirm reservation",
+
+  "bookingHistory": "Booking history",
+  "bookingCancelledSuccessfully": "Booking cancelled successfully",
+  "bookingRescheduledSuccessfully": "Booking rescheduled successfully",
+  "operationFailed": "Operation failed",
+  "noBookingsYet": "No bookings yet",
+  "bookingsWillAppearHere": "Your confirmed and pending reservations will appear here.",
+  "cancel": "Cancel",
+  "editTime": "Edit Time",
+  "cancelBooking": "Cancel Booking",
+  "cancelBookingConfirmation": "Are you sure you want to cancel your booking for {courtName} at {time}?",
+  "@cancelBookingConfirmation": {
+    "placeholders": {
+      "courtName": { "type": "String" },
+      "time": { "type": "String" }
+    }
+  },
+  "keep": "Keep",
+  "coachLabel": "Coach: {name}",
+  "@coachLabel": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+
+  "rescheduleBooking": "Reschedule Booking",
+  "currentTime": "Current: {start} – {end}",
+  "@currentTime": {
+    "placeholders": {
+      "start": { "type": "String" },
+      "end": { "type": "String" }
+    }
+  },
+  "selectNewTimeSlot": "Select new time slot",
+  "noAvailableSlots": "No available slots for this date.",
+  "failedToLoadSlots": "Failed to load slots.",
+  "rescheduling": "Rescheduling...",
+  "selectNewTime": "Select a new time",
+  "confirmTime": "Confirm {start} – {end}",
+  "@confirmTime": {
+    "placeholders": {
+      "start": { "type": "String" },
+      "end": { "type": "String" }
+    }
+  },
+  "current": "Current",
+
+  "missingPaymentDetails": "Missing payment details",
+  "returnAndTryAgain": "Return and try again.",
+  "instaPayPayment": "InstaPay Payment",
+  "couldNotLoadPaymentInfo": "Could not load payment info.",
+  "unknownError": "Unknown error",
+  "retry": "Retry",
+  "payWithInstaPay": "Pay with InstaPay",
+  "instaPayInstructions": "1. Click \"Pay Now\" below to open InstaPay.\n2. Complete the transfer.\n3. Return to this screen and click \"I have completed payment\".",
+  "payNow": "Pay Now",
+  "completedPayment": "I have completed payment",
+
+  "bookingConfirmed": "Booking confirmed",
+  "bookingPendingReview": "Booking pending review",
+  "waitingForAdminConfirmation": "Waiting for admin confirmation",
+  "backToDashboard": "Back to dashboard",
+
+  "selectSlotFirst": "Select a slot first",
+  "chooseAvailableSlot": "Choose an available slot from the court dashboard.",
+  "bookingDetails": "Booking details",
+  "time": "Time",
+  "selectDuringBooking": "Select during booking",
+  "courtFee": "Court fee",
+  "continueToCoachSelection": "Continue to coach selection",
+
+  "guestMember": "Guest Member",
+  "darkMode": "Dark mode",
+  "membershipStatus": "Membership status",
+  "pushNotifications": "Push notifications",
+  "fcmReady": "Firebase Cloud Messaging ready",
+  "signOut": "Sign out",
+  "guestAccess": "Guest access",
+  "standardMember": "Standard member",
+  "premiumMember": "Premium member",
+  "clubAdministrator": "Club administrator",
+
+  "coachesUnavailable": "Coaches unavailable",
+  "couldNotLoadCoaches": "We could not load the academy coaches.",
+  "noCoachesFound": "No coaches found",
+  "noActiveCoaches": "The academy has no active coaches right now.",
+  "viewProfile": "View profile",
+  "available": "Available",
+  "yearsShort": "{count} yrs",
+  "@yearsShort": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "coachNotFound": "Coach not found",
+  "selectCoachFromList": "Select a coach from the academy list.",
+  "aboutCoach": "About coach",
+  "trainingSpecialty": "Training specialty",
+  "weeklyAvailability": "Weekly availability",
+  "coachReservations": "Coach reservations",
+  "noReservationsYet": "No reservations yet",
+  "noWeeklyAvailability": "No weekly availability set",
+  "yearsExperience": "{count} years experience",
+  "@yearsExperience": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "pendingPayment": "Pending payment",
+  "pendingReview": "Pending review",
+  "confirmed": "Confirmed",
+  "rejected": "Rejected",
+  "cancelled": "Cancelled",
+
+  "adminBookings": "Admin bookings",
+  "refreshDay": "Refresh day",
+  "failedToLoadReservations": "Failed to load reservations",
+  "dailyReservations": "Daily reservations",
+  "pickDate": "Pick date",
+  "confirmedReservations": "Confirmed reservations",
+  "pendingConfirmations": "Pending confirmations",
+  "awaitingAdminReview": "Awaiting admin review",
+  "noConfirmedReservations": "No confirmed reservations",
+  "noReservationsOnDay": "No reservations on this day",
+  "confirm": "Confirm",
+  "reject": "Reject",
+  "paymentLabel": "Payment: {status}",
+  "@paymentLabel": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "methodLabel": "Method: {method}",
+  "@methodLabel": {
+    "placeholders": {
+      "method": { "type": "String" }
+    }
+  },
+  "paid": "Paid",
+  "paymentUnderReview": "Payment under review",
+  "awaitingPayment": "Awaiting payment",
+
+  "notifications": "Notifications",
+  "noNotificationsYet": "No notifications yet.",
+
+  "somethingNeedsAttention": "Something needs attention",
+
+  "pendingPaymentBadge": "PENDING PAYMENT",
+  "paymentReviewBadge": "PAYMENT REVIEW",
+  "confirmedBadge": "CONFIRMED",
+  "rejectedBadge": "REJECTED",
+  "cancelledBadge": "CANCELLED",
+
+  "totalAmount": "Total: {amount}LE",
+  "@totalAmount": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+
+  "pending": "Pending",
+  "language": "Language",
+  "arabic": "Arabic",
+  "english": "English"
+}

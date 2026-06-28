@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:honset_app/config/router/app_router.dart';
 import 'package:honset_app/core/utils/date_time_extensions.dart';
@@ -64,10 +65,10 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
     if (flow == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: const EmptyState(
+        body: EmptyState(
           icon: Icons.event_busy_rounded,
-          title: 'No booking selected',
-          message: 'Return to the dashboard and choose a slot.',
+          title: AppLocalizations.of(context)!.noBookingSelected,
+          message: AppLocalizations.of(context)!.returnToDashboardSlot,
         ),
       );
     }
@@ -80,13 +81,13 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
         }
         if (state.status == BookingActionStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message ?? 'Booking failed')),
+            SnackBar(content: Text(state.message ?? AppLocalizations.of(context)!.bookingFailed)),
           );
         }
       },
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Confirm booking')),
+          appBar: AppBar(title: Text(AppLocalizations.of(context)!.confirmBookingTitle)),
           body: ListView(
             padding: const EdgeInsets.all(20),
             children: [
@@ -97,19 +98,19 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Reservation summary',
+                        AppLocalizations.of(context)!.reservationSummary,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _SummaryRow(label: 'Court', value: flow.court.name),
+                      _SummaryRow(label: AppLocalizations.of(context)!.court, value: flow.court.name),
                       _SummaryRow(
-                        label: 'Date',
+                        label: AppLocalizations.of(context)!.date,
                         value: flow.slot.startsAt.readableDate,
                       ),
                       _SummaryRow(
-                        label: 'Total',
+                        label: AppLocalizations.of(context)!.total,
                         value:
                             '${flow.court.pricePerHour.toStringAsFixed(0)}LE',
                       ),
@@ -141,9 +142,9 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                         // 👈 السطر ده أساسي عشان يخلي النص والأيقونة يلتزموا بالـ 180 بكسل
                         isExpanded: true,
 
-                        decoration: const InputDecoration(
-                          labelText: 'Coach',
-                          prefixIcon: Icon(Icons.sports_rounded),
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.coach,
+                          prefixIcon: const Icon(Icons.sports_rounded),
                         ),
                         // باقي الكود بتاعك (items, onChanged...) زي ما هو تحت الديكوراسيون
                     items: [
@@ -209,14 +210,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Payment Method',
+                AppLocalizations.of(context)!.paymentMethod,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w900,
                 ),
               ),
               const SizedBox(height: 8),
               RadioListTile<String>(
-                title: const Text('Cash'),
+                title: Text(AppLocalizations.of(context)!.cash),
                 value: 'cash',
                 groupValue: _selectedPaymentMethod,
                 onChanged: (value) {
@@ -227,7 +228,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                 },
               ),
               RadioListTile<String>(
-                title: const Text('InstaPay'),
+                title: Text(AppLocalizations.of(context)!.instaPay),
                 value: 'instapay',
                 groupValue: _selectedPaymentMethod,
                 onChanged: (value) {
@@ -239,7 +240,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
               ),
               const SizedBox(height: 20),
               PrimaryButton(
-                label: 'Confirm reservation',
+                label: AppLocalizations.of(context)!.confirmReservation,
                 icon: Icons.verified_rounded,
                 isLoading: state.status == BookingActionStatus.loading,
                 onPressed: _selectedCoachId == null
@@ -257,7 +258,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text(
+                               content: Text(
                                 'Invalid coach selection. Please choose again.',
                               ),
                             ),
@@ -271,7 +272,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text(
+                               content: Text(
                                 'Coach selection mismatch. Please choose again.',
                               ),
                             ),

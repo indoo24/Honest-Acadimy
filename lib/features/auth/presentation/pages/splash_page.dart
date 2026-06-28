@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
 import 'package:honset_app/features/auth/presentation/cubit/auth_cubit.dart';
@@ -179,7 +180,7 @@ class _SplashPageState extends State<SplashPage>
                     child: Column(
                       children: [
                         Text(
-                          'HONEST ACADEMY',
+                          AppLocalizations.of(context)!.honestAcademy,
                           style: TextStyle(
                             color: AppColors.pureWhite,
                             fontSize: 22,
@@ -190,7 +191,7 @@ class _SplashPageState extends State<SplashPage>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'FITNESS & SQUASH ACADEMY',
+                          AppLocalizations.of(context)!.fitnessSquashAcademy,
                           style: TextStyle(
                             color: AppColors.subtitleGray,
                             fontSize: 12,

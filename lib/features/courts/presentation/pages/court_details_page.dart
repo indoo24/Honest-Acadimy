@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:honset_app/config/router/app_router.dart';
@@ -30,10 +31,10 @@ class CourtDetailsPage extends StatelessWidget {
     if (resolvedArgs == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: const EmptyState(
+        body: EmptyState(
           icon: Icons.sports_tennis_rounded,
-          title: 'Court not selected',
-          message: 'Return to the booking dashboard and choose a court.',
+          title: AppLocalizations.of(context)!.courtNotSelected,
+          message: AppLocalizations.of(context)!.returnToBookingDashboard,
         ),
       );
     }
@@ -179,7 +180,7 @@ class _CourtDetailsView extends StatelessWidget {
                     if (state.status == CourtDetailsStatus.failure) ...[
                       const SizedBox(height: 10),
                       Text(
-                        state.errorMessage ?? 'Failed to load bookings.',
+                        state.errorMessage ?? AppLocalizations.of(context)!.failedToLoadBookings,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppColors.dangerRed,
                             ),
@@ -190,7 +191,7 @@ class _CourtDetailsView extends StatelessWidget {
                     // ── Booked Times ──
                     const SizedBox(height: 8),
                     Text(
-                      'Booked times',
+                      AppLocalizations.of(context)!.bookedTimes,
                       style: Theme.of(context)
                           .textTheme
                           .titleLarge
@@ -202,7 +203,7 @@ class _CourtDetailsView extends StatelessWidget {
                     // ── Time Slots ──
                     const SizedBox(height: 24),
                     Text(
-                      'Select your booking time',
+                      AppLocalizations.of(context)!.selectBookingTime,
                       style: Theme.of(context)
                           .textTheme
                           .titleLarge
@@ -210,7 +211,7 @@ class _CourtDetailsView extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     if (state.generatedSlots.isEmpty && state.status == CourtDetailsStatus.loaded)
-                      const Text('No slots available for this date.'),
+                      Text(AppLocalizations.of(context)!.noSlotsAvailable),
                     if (state.generatedSlots.isNotEmpty)
                       GridView.builder(
                         shrinkWrap: true,
@@ -254,8 +255,8 @@ class _CourtDetailsView extends StatelessWidget {
                       icon: const Icon(Icons.event_available_rounded),
                       label: Text(
                         state.selectedSlot == null
-                            ? 'Select a time slot'
-                            : 'Book ${state.selectedSlot!.startsAt.timeLabel} – ${state.selectedSlot!.endsAt.timeLabel}',
+                            ? AppLocalizations.of(context)!.selectTimeSlot
+                            : AppLocalizations.of(context)!.bookTimeRange(state.selectedSlot!.startsAt.timeLabel, state.selectedSlot!.endsAt.timeLabel),
                       ),
                     ),
                   ],
@@ -323,7 +324,7 @@ class _BookedTimesList extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Text(
-              'No bookings yet — all times available!',
+              AppLocalizations.of(context)!.noBookingsAllAvailable,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.squashGreen,
                     fontWeight: FontWeight.w600,
@@ -356,9 +357,10 @@ class _BookedTimeCard extends StatelessWidget {
     final statusColor = booking.status == BookingStatus.confirmed
         ? AppColors.dangerRed
         : AppColors.rallyOrange;
+    final l10n = AppLocalizations.of(context)!;
     final statusLabel = booking.status == BookingStatus.confirmed
-        ? 'Confirmed'
-        : 'Pending';
+        ? l10n.confirmed
+        : l10n.pending;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -384,7 +386,7 @@ class _BookedTimeCard extends StatelessWidget {
                 ),
                 if (booking.coachName.isNotEmpty)
                   Text(
-                    'Coach: ${booking.coachName}',
+                    l10n.coachLabel(booking.coachName),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
               ],
@@ -466,7 +468,7 @@ class _SlotTile extends StatelessWidget {
               ),
               if (!isAvailable)
                 Text(
-                  'Unavailable',
+                  AppLocalizations.of(context)!.unavailable,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: textColor,
                         fontSize: 10,
@@ -521,7 +523,7 @@ class _PriceSummary extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Duration',
+                AppLocalizations.of(context)!.duration,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(
@@ -536,7 +538,7 @@ class _PriceSummary extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Rate', style: Theme.of(context).textTheme.bodyMedium),
+              Text(AppLocalizations.of(context)!.rate, style: Theme.of(context).textTheme.bodyMedium),
               Text(
                 '\$${pricePerHour.toStringAsFixed(0)} / hour',
                 style: Theme.of(context).textTheme.bodyMedium,
@@ -548,7 +550,7 @@ class _PriceSummary extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Total',
+                AppLocalizations.of(context)!.total,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                     ),
@@ -635,12 +637,12 @@ class _BookingSheetState extends State<_BookingSheet> {
           if (!widget.parentContext.mounted) return;
           ScaffoldMessenger.of(
             widget.parentContext,
-          ).showSnackBar(const SnackBar(content: Text('Booking created')));
+          ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(widget.parentContext)!.bookingCreated)));
           widget.parentContext.read<CourtsCubit>().loadDashboard();
         } else if (state.status == BookingActionStatus.failure) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message ?? 'Booking failed')),
+            SnackBar(content: Text(state.message ?? AppLocalizations.of(context)!.bookingFailed)),
           );
         }
       },
@@ -656,7 +658,7 @@ class _BookingSheetState extends State<_BookingSheet> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Reserve court',
+                AppLocalizations.of(context)!.reserveCourt,
                 style: Theme.of(context)
                     .textTheme
                     .titleLarge
@@ -697,9 +699,9 @@ class _BookingSheetState extends State<_BookingSheet> {
                         ),
                         isExpanded: true,
                         initialValue: selectedCoach?.id,
-                        decoration: const InputDecoration(
-                          labelText: 'Coach',
-                          prefixIcon: Icon(Icons.sports_rounded),
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.coach,
+                          prefixIcon: const Icon(Icons.sports_rounded),
                         ),
                         items: [
                           for (final coach in coaches)
@@ -785,9 +787,9 @@ class _BookingSheetState extends State<_BookingSheet> {
                               );
                               if (mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                  SnackBar(
                                     content: Text(
-                                      'Invalid coach selection. Please choose again.',
+                                      AppLocalizations.of(context)!.invalidCoachSelection,
                                     ),
                                   ),
                                 );
@@ -828,7 +830,7 @@ class _BookingSheetState extends State<_BookingSheet> {
                             ),
                     ),
                     label: Text(
-                      isLoading ? 'Confirming...' : 'Confirm booking',
+                      isLoading ? AppLocalizations.of(context)!.confirmingBooking : AppLocalizations.of(context)!.confirmBookingButton,
                     ),
                   );
                 },

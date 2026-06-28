@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:honset_app/config/router/app_router.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
@@ -49,7 +50,7 @@ class _HomePageState extends State<HomePage> {
         actions: [
           const NotificationBell(),
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: AppLocalizations.of(context)!.refresh,
             onPressed: () => context.read<CourtsCubit>().refresh(),
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -67,7 +68,7 @@ class _HomePageState extends State<HomePage> {
         builder: (context, state) {
           return switch (state.status) {
             CourtsStatus.failure => ErrorStateView(
-              message: state.message ?? 'Could not load courts.',
+              message: state.message ?? AppLocalizations.of(context)!.couldNotLoadCourts,
               onRetry: () => context.read<CourtsCubit>().refresh(),
             ),
             CourtsStatus.loading ||
@@ -99,14 +100,14 @@ class _DashboardContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Court reservations',
+                  AppLocalizations.of(context)!.courtReservations,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Live availability across all squash courts.',
+                  AppLocalizations.of(context)!.liveAvailability,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 18),
@@ -306,7 +307,7 @@ class _CourtCard extends StatelessWidget {
                           vertical: 8,
                         ),
                         child: Text(
-                          '${court.pricePerHour.toStringAsFixed(0)}LE / hour',
+                          AppLocalizations.of(context)!.pricePerHour(court.pricePerHour.toStringAsFixed(0)),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,
@@ -362,8 +363,8 @@ class _CourtCard extends StatelessWidget {
                       icon: const Icon(Icons.event_available_rounded),
                       label: Text(
                         nextAvailable == null
-                            ? 'View details'
-                            : 'Book ${nextAvailable.startsAt.timeLabel}',
+                            ? AppLocalizations.of(context)!.viewDetails
+                            : AppLocalizations.of(context)!.bookTime(nextAvailable.startsAt.timeLabel),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),

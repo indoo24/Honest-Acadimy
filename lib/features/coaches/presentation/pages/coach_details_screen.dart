@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:honset_app/config/router/app_router.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
 import 'package:honset_app/core/di/injection.dart';
@@ -22,10 +23,10 @@ class CoachDetailsScreen extends StatelessWidget {
     if (details == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: const EmptyState(
+        body: EmptyState(
           icon: Icons.people_alt_rounded,
-          title: 'Coach not found',
-          message: 'Select a coach from the academy list.',
+          title: AppLocalizations.of(context)!.coachNotFound,
+          message: AppLocalizations.of(context)!.selectCoachFromList,
         ),
       );
     }
@@ -98,7 +99,7 @@ class CoachDetailsScreen extends StatelessWidget {
                     _HeaderSummary(coach: coach),
                     const SizedBox(height: 20),
                     _Section(
-                      title: 'About coach',
+                      title: AppLocalizations.of(context)!.aboutCoach,
                       child: Text(
                         coach.bio,
                         style: Theme.of(context).textTheme.bodyMedium,
@@ -106,7 +107,7 @@ class CoachDetailsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     _Section(
-                      title: 'Training specialty',
+                      title: AppLocalizations.of(context)!.trainingSpecialty,
                       child: Text(
                         coach.specialty,
                         style: Theme.of(context).textTheme.bodyMedium,
@@ -114,14 +115,14 @@ class CoachDetailsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     _Section(
-                      title: 'Weekly availability',
+                      title: AppLocalizations.of(context)!.weeklyAvailability,
                       child: _WeeklyAvailabilityCard(
                         weeklyAvailability: coach.weeklyAvailability,
                       ),
                     ),
                     const SizedBox(height: 20),
                     _Section(
-                      title: 'Coach reservations',
+                      title: AppLocalizations.of(context)!.coachReservations,
                       child: StreamBuilder<List<Booking>>(
                         stream: _coachBookingsStream(coach.id),
                         builder: (context, bookingSnapshot) {
@@ -136,9 +137,9 @@ class CoachDetailsScreen extends StatelessWidget {
                           }
                           final bookings = bookingSnapshot.data ?? const [];
                           if (bookings.isEmpty) {
-                            return const EmptyState(
+                            return EmptyState(
                               icon: Icons.event_available_rounded,
-                              title: 'No reservations yet',
+                              title: AppLocalizations.of(context)!.noReservationsYet,
                               message: '',
                             );
                           }
@@ -212,7 +213,7 @@ class _HeaderSummary extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '${coach.yearsExperience} years experience',
+                    AppLocalizations.of(context)!.yearsExperience(coach.yearsExperience),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                     ),
@@ -283,9 +284,9 @@ class _WeeklyAvailabilityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (weeklyAvailability.isEmpty) {
-      return const EmptyState(
+      return EmptyState(
         icon: Icons.schedule_rounded,
-        title: 'No weekly availability set',
+        title: AppLocalizations.of(context)!.noWeeklyAvailability,
         message: '',
       );
     }
@@ -444,7 +445,7 @@ class _ReservationRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
-              _statusLabel(booking.status),
+              _statusLabel(context, booking.status),
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: _statusColor(booking.status),
                 fontWeight: FontWeight.w800,
@@ -456,13 +457,14 @@ class _ReservationRow extends StatelessWidget {
     );
   }
 
-  String _statusLabel(BookingStatus status) {
+  String _statusLabel(BuildContext context, BookingStatus status) {
+    final l10n = AppLocalizations.of(context)!;
     return switch (status) {
-      BookingStatus.pendingPayment => 'Pending payment',
-      BookingStatus.pendingPaymentReview => 'Pending review',
-      BookingStatus.confirmed => 'Confirmed',
-      BookingStatus.rejected => 'Rejected',
-      BookingStatus.cancelled => 'Cancelled',
+      BookingStatus.pendingPayment => l10n.pendingPayment,
+      BookingStatus.pendingPaymentReview => l10n.pendingReview,
+      BookingStatus.confirmed => l10n.confirmed,
+      BookingStatus.rejected => l10n.rejected,
+      BookingStatus.cancelled => l10n.cancelled,
     };
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:honset_app/config/router/app_router.dart';
 import 'package:honset_app/features/auth/presentation/cubit/auth_cubit.dart';
@@ -49,10 +50,10 @@ class _BookingPaymentPageState extends State<BookingPaymentPage> {
     if (widget.args == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: const EmptyState(
+        body: EmptyState(
           icon: Icons.error_outline_rounded,
-          title: 'Missing payment details',
-          message: 'Return and try again.',
+          title: AppLocalizations.of(context)!.missingPaymentDetails,
+          message: AppLocalizations.of(context)!.returnAndTryAgain,
         ),
       );
     }
@@ -66,13 +67,13 @@ class _BookingPaymentPageState extends State<BookingPaymentPage> {
         }
         if (state.status == BookingActionStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message ?? 'Booking failed')),
+            SnackBar(content: Text(state.message ?? AppLocalizations.of(context)!.bookingFailed)),
           );
         }
       },
       builder: (context, bookingState) {
         return Scaffold(
-          appBar: AppBar(title: const Text('InstaPay Payment')),
+          appBar: AppBar(title: Text(AppLocalizations.of(context)!.instaPayPayment)),
           body: BlocBuilder<SettingsCubit, SettingsState>(
             builder: (context, settingsState) {
               // --- Loading state ---
@@ -92,13 +93,13 @@ class _BookingPaymentPageState extends State<BookingPaymentPage> {
                         const Icon(Icons.error_outline, size: 48, color: Colors.red),
                         const SizedBox(height: 16),
                         Text(
-                          'Could not load payment info.',
+                          AppLocalizations.of(context)!.couldNotLoadPaymentInfo,
                           style: Theme.of(context).textTheme.titleMedium,
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          settingsState.errorMessage ?? 'Unknown error',
+                          settingsState.errorMessage ?? AppLocalizations.of(context)!.unknownError,
                           style: Theme.of(context).textTheme.bodySmall,
                           textAlign: TextAlign.center,
                         ),
@@ -107,7 +108,7 @@ class _BookingPaymentPageState extends State<BookingPaymentPage> {
                           onPressed: () =>
                               context.read<SettingsCubit>().loadInstaPayLink(),
                           icon: const Icon(Icons.refresh),
-                          label: const Text('Retry'),
+                          label: Text(AppLocalizations.of(context)!.retry),
                         ),
                       ],
                     ),
@@ -124,31 +125,29 @@ class _BookingPaymentPageState extends State<BookingPaymentPage> {
                   const Icon(Icons.account_balance_wallet, size: 64, color: Colors.blue),
                   const SizedBox(height: 24),
                   Text(
-                    'Pay with InstaPay',
+                    AppLocalizations.of(context)!.payWithInstaPay,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    '1. Click "Pay Now" below to open InstaPay.\n'
-                    '2. Complete the transfer.\n'
-                    '3. Return to this screen and click "I have completed payment".',
-                    style: TextStyle(fontSize: 16, height: 1.5),
+                  Text(
+                    AppLocalizations.of(context)!.instaPayInstructions,
+                    style: const TextStyle(fontSize: 16, height: 1.5),
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton.icon(
                     onPressed: () => _launchInstaPay(instaPayLink),
                     icon: const Icon(Icons.open_in_new),
-                    label: const Text('Pay Now'),
+                    label: Text(AppLocalizations.of(context)!.payNow),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
                   const SizedBox(height: 24),
                   PrimaryButton(
-                    label: 'I have completed payment',
+                    label: AppLocalizations.of(context)!.completedPayment,
                     isLoading: bookingState.status == BookingActionStatus.loading,
                     onPressed: () {
                       debugPrint('[BOOKING PAYMENT]\nmethod=instapay\nstatus=pending_payment_review');

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:honset_app/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:honset_app/features/auth/presentation/cubit/auth_state.dart';
@@ -28,13 +29,14 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         if (!context.mounted) return;
         if (state.status == AuthStatus.authenticated) context.go('/home');
         if (state.status == AuthStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message ?? 'Registration failed')),
+            SnackBar(content: Text(state.message ?? l10n.registrationFailed)),
           );
         }
       },
@@ -53,44 +55,44 @@ class _RegisterPageState extends State<RegisterPage> {
                     const Center(child: AppLogo(size: 64)),
                     const SizedBox(height: 28),
                     Text(
-                      'Create account',
+                      l10n.createAccount,
                       style: Theme.of(context).textTheme.headlineMedium
                           ?.copyWith(fontWeight: FontWeight.w900),
                     ),
                     const SizedBox(height: 18),
                     TextField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Full name',
-                        prefixIcon: Icon(Icons.badge_outlined),
+                      decoration: InputDecoration(
+                        labelText: l10n.fullName,
+                        prefixIcon: const Icon(Icons.badge_outlined),
                       ),
                     ),
                     const SizedBox(height: 14),
                     TextField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.mail_outline_rounded),
+                      decoration: InputDecoration(
+                        labelText: l10n.email,
+                        prefixIcon: const Icon(Icons.mail_outline_rounded),
                       ),
                     ),
                     const SizedBox(height: 14),
                     TextField(
                       controller: _passwordController,
                       obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: Icon(Icons.lock_outline_rounded),
+                      decoration: InputDecoration(
+                        labelText: l10n.password,
+                        prefixIcon: const Icon(Icons.lock_outline_rounded),
                       ),
                     ),
                     const SizedBox(height: 22),
                     PrimaryButton(
-                      label: 'Create account',
+                      label: l10n.createAccountButton,
                       icon: Icons.person_add_alt_1_rounded,
                       isLoading: isLoading,
                       onPressed: () => context.read<AuthCubit>().register(
                         name: _nameController.text.trim().isEmpty
-                            ? 'Club Member'
+                            ? l10n.clubMember
                             : _nameController.text.trim(),
                         email: _emailController.text.trim(),
                         password: _passwordController.text,
@@ -99,7 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 12),
                     TextButton(
                       onPressed: () => context.go('/login'),
-                      child: const Text('Already have an account? Sign in'),
+                      child: Text(l10n.alreadyHaveAccount),
                     ),
                   ],
                 ),

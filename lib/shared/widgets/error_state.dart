@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 
 class ErrorStateView extends StatelessWidget {
   const ErrorStateView({
@@ -12,6 +13,7 @@ class ErrorStateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -25,7 +27,7 @@ class ErrorStateView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Something needs attention',
+              l10n.somethingNeedsAttention,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -36,7 +38,7 @@ class ErrorStateView extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Retry'),
+              label: Text(l10n.retry),
             ),
           ],
         ),

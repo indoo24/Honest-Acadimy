@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
 import 'package:honset_app/core/utils/date_time_extensions.dart';
 import 'package:honset_app/features/admin/presentation/cubit/admin_cubit.dart';
@@ -39,10 +40,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin bookings'),
+        title: Text(AppLocalizations.of(context)!.adminBookings),
         actions: [
           IconButton(
-            tooltip: 'Refresh day',
+            tooltip: AppLocalizations.of(context)!.refreshDay,
             onPressed: () => context.read<AdminCubit>().loadDailyOverview(),
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -69,7 +70,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      state.message ?? 'Failed to load reservations',
+                      state.message ?? AppLocalizations.of(context)!.failedToLoadReservations,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
@@ -79,7 +80,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                           .read<AdminCubit>()
                           .loadDailyOverview(date: state.selectedDate),
                       icon: const Icon(Icons.refresh_rounded),
-                      label: const Text('Retry'),
+                      label: Text(AppLocalizations.of(context)!.retry),
                     ),
                   ],
                 ),
@@ -103,7 +104,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 ),
                 const SizedBox(height: 18),
                 _SectionHeader(
-                  title: 'Confirmed reservations',
+                  title: AppLocalizations.of(context)!.confirmedReservations,
                   subtitle: state.selectedDateLabel,
                   icon: Icons.verified_rounded,
                 ),
@@ -116,17 +117,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     ),
                   )
                 else if (state.hasBookings)
-                  const _EmptySectionMessage(message: 'No confirmed reservations')
+                  _EmptySectionMessage(message: AppLocalizations.of(context)!.noConfirmedReservations)
                 else
-                  const EmptyState(
+                  EmptyState(
                     icon: Icons.event_busy_rounded,
-                    title: 'No reservations on this day',
+                    title: AppLocalizations.of(context)!.noReservationsOnDay,
                     message: '',
                   ),
                 const SizedBox(height: 16),
                 _SectionHeader(
-                  title: 'Pending confirmations',
-                  subtitle: 'Awaiting admin review',
+                  title: AppLocalizations.of(context)!.pendingConfirmations,
+                  subtitle: AppLocalizations.of(context)!.awaitingAdminReview,
                   icon: Icons.pending_actions_rounded,
                 ),
                 const SizedBox(height: 12),
@@ -201,7 +202,7 @@ class _AdminDateSelector extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Daily reservations',
+                      AppLocalizations.of(context)!.dailyReservations,
                       style: Theme.of(context)
                           .textTheme
                           .titleMedium
@@ -224,7 +225,7 @@ class _AdminDateSelector extends StatelessWidget {
               FilledButton.tonalIcon(
                 onPressed: onPickDate,
                 icon: const Icon(Icons.calendar_month_rounded),
-                label: const Text('Pick date'),
+                label: Text(AppLocalizations.of(context)!.pickDate),
               ),
             ],
           ),
@@ -376,34 +377,36 @@ class _BookingCard extends StatelessWidget {
   final Booking booking;
   final bool showActions;
 
-  String _statusLabel() {
+  String _statusLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (booking.status) {
       case BookingStatus.confirmed:
-        return 'Confirmed';
+        return l10n.confirmed;
       case BookingStatus.pendingPayment:
-        return 'Pending payment';
+        return l10n.pendingPayment;
       case BookingStatus.pendingPaymentReview:
-        return 'Pending review';
+        return l10n.pendingReview;
       case BookingStatus.rejected:
-        return 'Rejected';
+        return l10n.rejected;
       case BookingStatus.cancelled:
-        return 'Cancelled';
+        return l10n.cancelled;
     }
   }
 
-  String _paymentStatusLabel() {
-    if (booking.paymentConfirmed) return 'Paid';
+  String _paymentStatusLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    if (booking.paymentConfirmed) return l10n.paid;
     switch (booking.status) {
       case BookingStatus.confirmed:
-        return 'Confirmed';
+        return l10n.confirmed;
       case BookingStatus.pendingPaymentReview:
-        return 'Payment under review';
+        return l10n.paymentUnderReview;
       case BookingStatus.pendingPayment:
-        return 'Awaiting payment';
+        return l10n.awaitingPayment;
       case BookingStatus.rejected:
-        return 'Rejected';
+        return l10n.rejected;
       case BookingStatus.cancelled:
-        return 'Cancelled';
+        return l10n.cancelled;
     }
   }
 
@@ -468,7 +471,7 @@ class _BookingCard extends StatelessWidget {
                   ),
                 ),
                 _StatusBadge(
-                  label: _statusLabel(),
+                  label: _statusLabel(context),
                   color: statusColor,
                 ),
               ],
@@ -480,13 +483,13 @@ class _BookingCard extends StatelessWidget {
               children: [
                 _DetailChip(
                   icon: Icons.receipt_long_rounded,
-                  label: 'Payment: ${_paymentStatusLabel()}',
+                  label: AppLocalizations.of(context)!.paymentLabel(_paymentStatusLabel(context)),
                   color: statusColor,
                 ),
                 if ((booking.paymentMethod ?? '').isNotEmpty)
                   _DetailChip(
                     icon: Icons.payments_rounded,
-                    label: 'Method: ${booking.paymentMethod}',
+                    label: AppLocalizations.of(context)!.methodLabel(booking.paymentMethod!),
                     color: AppColors.squashGreen,
                   ),
               ],
@@ -502,7 +505,7 @@ class _BookingCard extends StatelessWidget {
                       ),
                       onPressed: () => context.read<AdminCubit>().confirmBooking(booking.id),
                       icon: const Icon(Icons.check_circle_outline),
-                      label: const Text('Confirm'),
+                      label: Text(AppLocalizations.of(context)!.confirm),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -514,7 +517,7 @@ class _BookingCard extends StatelessWidget {
                       ),
                       onPressed: () => context.read<AdminCubit>().rejectBooking(booking.id),
                       icon: const Icon(Icons.cancel_outlined),
-                      label: const Text('Reject'),
+                      label: Text(AppLocalizations.of(context)!.reject),
                     ),
                   ),
                 ],

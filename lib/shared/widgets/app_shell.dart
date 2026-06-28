@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
 import 'package:honset_app/features/auth/presentation/cubit/auth_cubit.dart';
@@ -11,30 +12,32 @@ class AppShell extends StatelessWidget {
   final String location;
   final Widget child;
 
-  static final List<_ShellDestination> _allDestinations = [
-    const _ShellDestination('/home', Icons.dashboard_rounded, 'Home'),
-    const _ShellDestination('/coaches', Icons.sports_rounded, 'Coaches'),
-    const _ShellDestination(
+  static List<_ShellDestination> _destinations(AppLocalizations l10n) => [
+    _ShellDestination('/home', Icons.dashboard_rounded, l10n.home),
+    _ShellDestination('/coaches', Icons.sports_rounded, l10n.coaches),
+    _ShellDestination(
       '/history',
       Icons.confirmation_number_rounded,
-      'Bookings',
+      l10n.bookings,
     ),
-    const _ShellDestination(
+    _ShellDestination(
       '/admin',
       Icons.admin_panel_settings_rounded,
-      'Admin',
+      l10n.admin,
       adminOnly: true,
     ),
-    const _ShellDestination('/profile', Icons.person_rounded, 'Profile'),
+    _ShellDestination('/profile', Icons.person_rounded, l10n.profile),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isAdmin = context.select<AuthCubit, bool>(
       (cubit) => cubit.state.user?.isAdmin ?? false,
     );
 
-    final destinations = _allDestinations
+    final allDestinations = _destinations(l10n);
+    final destinations = allDestinations
         .where((item) => !item.adminOnly || isAdmin)
         .toList(growable: false);
     final selectedIndex = destinations.indexWhere(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
 import 'package:honset_app/core/di/injection.dart';
 import 'package:honset_app/core/utils/date_time_extensions.dart';
@@ -37,24 +38,24 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Booking history')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.bookingHistory)),
       body: BlocConsumer<BookingCubit, BookingState>(
         listener: (context, state) {
           if (state.status == BookingActionStatus.success &&
               state.lastAction == BookingLastAction.cancel) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Booking cancelled successfully')),
+              SnackBar(content: Text(AppLocalizations.of(context)!.bookingCancelledSuccessfully)),
             );
           } else if (state.status == BookingActionStatus.success &&
               state.lastAction == BookingLastAction.reschedule) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Booking rescheduled successfully')),
+              SnackBar(content: Text(AppLocalizations.of(context)!.bookingRescheduledSuccessfully)),
             );
           } else if (state.status == BookingActionStatus.failure &&
               (state.lastAction == BookingLastAction.cancel ||
                   state.lastAction == BookingLastAction.reschedule)) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message ?? 'Operation failed')),
+              SnackBar(content: Text(state.message ?? AppLocalizations.of(context)!.operationFailed)),
             );
           }
         },
@@ -64,11 +65,11 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (state.history.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.confirmation_number_outlined,
-              title: 'No bookings yet',
+              title: AppLocalizations.of(context)!.noBookingsYet,
               message:
-                  'Your confirmed and pending reservations will appear here.',
+                  AppLocalizations.of(context)!.bookingsWillAppearHere,
             );
           }
           return ListView.separated(
@@ -170,7 +171,7 @@ class _BookingCard extends StatelessWidget {
                       size: 16, color: AppColors.subtitleGray),
                   const SizedBox(width: 6),
                   Text(
-                    'Coach: ${booking.coachName}',
+                    AppLocalizations.of(context)!.coachLabel(booking.coachName),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.subtitleGray,
                         ),
@@ -201,8 +202,8 @@ class _BookingCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 10),
                       ),
                       icon: const Icon(Icons.cancel_outlined, size: 18),
-                      label: const Text('Cancel',
-                          style: TextStyle(fontWeight: FontWeight.w700)),
+                      label: Text(AppLocalizations.of(context)!.cancel,
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -220,8 +221,8 @@ class _BookingCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 10),
                       ),
                       icon: const Icon(Icons.edit_calendar_rounded, size: 18),
-                      label: const Text('Edit Time',
-                          style: TextStyle(fontWeight: FontWeight.w700)),
+                      label: Text(AppLocalizations.of(context)!.editTime,
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ],
@@ -241,22 +242,21 @@ class _BookingCard extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Text('Cancel Booking'),
+          title: Text(AppLocalizations.of(context)!.cancelBooking),
           content: Text(
-            'Are you sure you want to cancel your booking for '
-            '${booking.courtName} at ${booking.startsAt.timeLabel}?',
+            AppLocalizations.of(context)!.cancelBookingConfirmation(booking.courtName, booking.startsAt.timeLabel),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Keep'),
+              child: Text(AppLocalizations.of(context)!.keep),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.dangerRed,
               ),
-              child: const Text('Cancel Booking'),
+              child: Text(AppLocalizations.of(context)!.cancelBooking),
             ),
           ],
         );
@@ -361,7 +361,7 @@ class _RescheduleSheetState extends State<_RescheduleSheet> {
               children: [
                 // ── Title ──
                 Text(
-                  'Reschedule Booking',
+                  AppLocalizations.of(context)!.rescheduleBooking,
                   style: Theme.of(context)
                       .textTheme
                       .titleLarge
@@ -389,7 +389,7 @@ class _RescheduleSheetState extends State<_RescheduleSheet> {
                           size: 16, color: AppColors.dangerRed),
                       const SizedBox(width: 6),
                       Text(
-                        'Current: ${widget.booking.startsAt.timeLabel} – ${widget.booking.endsAt.timeLabel}',
+                        AppLocalizations.of(context)!.currentTime(widget.booking.startsAt.timeLabel, widget.booking.endsAt.timeLabel),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppColors.dangerRed,
                               fontWeight: FontWeight.w700,
@@ -401,7 +401,7 @@ class _RescheduleSheetState extends State<_RescheduleSheet> {
 
                 const SizedBox(height: 20),
                 Text(
-                  'Select new time slot',
+                  AppLocalizations.of(context)!.selectNewTimeSlot,
                   style: Theme.of(context)
                       .textTheme
                       .titleMedium
@@ -422,7 +422,7 @@ class _RescheduleSheetState extends State<_RescheduleSheet> {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: Text(
-                          state.errorMessage ?? 'Failed to load slots.',
+                          state.errorMessage ?? AppLocalizations.of(context)!.failedToLoadSlots,
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
@@ -431,9 +431,9 @@ class _RescheduleSheetState extends State<_RescheduleSheet> {
                       );
                     }
                     if (state.generatedSlots.isEmpty) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20),
-                        child: Text('No available slots for this date.'),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Text(AppLocalizations.of(context)!.noAvailableSlots),
                       );
                     }
 
@@ -511,10 +511,10 @@ class _RescheduleSheetState extends State<_RescheduleSheet> {
                       ),
                       label: Text(
                         isLoading
-                            ? 'Rescheduling...'
+                            ? AppLocalizations.of(context)!.rescheduling
                             : _selectedSlot == null
-                                ? 'Select a new time'
-                                : 'Confirm ${_selectedSlot!.startsAt.timeLabel} – ${_selectedSlot!.endsAt.timeLabel}',
+                                ? AppLocalizations.of(context)!.selectNewTime
+                                : AppLocalizations.of(context)!.confirmTime(_selectedSlot!.startsAt.timeLabel, _selectedSlot!.endsAt.timeLabel),
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                     );
@@ -600,7 +600,7 @@ class _RescheduleSlotTile extends StatelessWidget {
               ),
               if (isCurrentSlot)
                 Text(
-                  'Current',
+                  AppLocalizations.of(context)!.current,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: AppColors.dangerRed,
                         fontSize: 10,
@@ -609,7 +609,7 @@ class _RescheduleSlotTile extends StatelessWidget {
                 )
               else if (!slot.canBook)
                 Text(
-                  'Unavailable',
+                  AppLocalizations.of(context)!.unavailable,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: textColor,
                         fontSize: 10,

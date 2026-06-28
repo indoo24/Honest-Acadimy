@@ -81,24 +81,38 @@ class AppRouter {
     : router = GoRouter(
         navigatorKey: _rootNavigatorKey,
         initialLocation: '/',
-        refreshListenable: _GoRouterRefreshStream(authCubit.stream),
-        redirect: (context, state) {
-          final authState = authCubit.state;
-          final isAuthed = authState.status == AuthStatus.authenticated;
-          final path = state.uri.path;
-          final isAuthPath =
-              path == '/' || path == '/login' || path == '/register';
-          if (!isAuthed && !isAuthPath) {
-            return '/login';
-          }
-          if (isAuthed && (path == '/login' || path == '/register')) {
-            return '/home';
-          }
-          if (path == '/admin' && !(authState.user?.isAdmin ?? false)) {
-            return '/home';
-          }
-          return null;
-        },
+    refreshListenable: _GoRouterRefreshStream(authCubit.stream),
+    redirect: (context, state) {
+      final authState = authCubit.state;
+      final status = authState.status;
+      final path = state.uri.path;
+
+      // 👈 1. السحر هنا: لو الـ Cubit لسه بيحمل الداتا في الأول، سيبه واقف على الـ Splash بأمان وميحولش لـ Login
+      if (status == AuthStatus.initial || status == AuthStatus.loading) {
+        // لو هو أصلاً على شاشات الـ Auth سيبه، غير كده خليه على الـ Splash
+        return (path == '/login' || path == '/register') ? null : '/';
+      }
+
+      final isAuthed = status == AuthStatus.authenticated;
+      final isAuthPath = path == '/' || path == '/login' || path == '/register';
+
+      // 2. لو مش مسجل دخول ومحتاج يدخل شاشة جوه الأبلكيشن، واديه الـ Login
+      if (!isAuthed && !isAuthPath) {
+        return '/login';
+      }
+
+      // 3. لو مسجل دخول وبيحاول يفتح الـ Login أو الـ Splash، طيره فوراً على الـ Home
+      if (isAuthed && (path == '/' || path == '/login' || path == '/register')) {
+        return '/home';
+      }
+
+      // 4. حماية صفحة الأدمن
+      if (path == '/admin' && !(authState.user?.isAdmin ?? false)) {
+        return '/home';
+      }
+
+      return null;
+    },
         routes: [
           GoRoute(
             path: '/',

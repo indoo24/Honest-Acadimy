@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:honset_app/core/utils/date_time_extensions.dart';
 import 'package:honset_app/features/booking/presentation/cubit/booking_cubit.dart';
@@ -36,7 +37,7 @@ class _BookingSuccessPageState extends State<BookingSuccessPage>
   Widget build(BuildContext context) {
     final booking = context.read<BookingCubit>().state.latestBooking;
     return Scaffold(
-      appBar: AppBar(title: const Text('Booking confirmed')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.bookingConfirmed)),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -65,14 +66,14 @@ class _BookingSuccessPageState extends State<BookingSuccessPage>
                     ),
                     const SizedBox(height: 18),
                     Text(
-                      'Booking pending review',
+                      AppLocalizations.of(context)!.bookingPendingReview,
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(fontWeight: FontWeight.w900),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Waiting for admin confirmation',
+                      AppLocalizations.of(context)!.waitingForAdminConfirmation,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.w700,
@@ -85,7 +86,7 @@ class _BookingSuccessPageState extends State<BookingSuccessPage>
                         '${booking.courtName} • ${booking.startsAt.readableDate}',
                       ),
                       Text(
-                        'Coach: ${booking.coachName}',
+                        AppLocalizations.of(context)!.coachLabel(booking.coachName),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),
@@ -109,7 +110,7 @@ class _BookingSuccessPageState extends State<BookingSuccessPage>
                     ],
                     const SizedBox(height: 24),
                     PrimaryButton(
-                      label: 'Back to dashboard',
+                      label: AppLocalizations.of(context)!.backToDashboard,
                       icon: Icons.dashboard_rounded,
                       onPressed: () => context.go('/home'),
                     ),

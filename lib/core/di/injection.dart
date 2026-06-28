@@ -24,6 +24,7 @@ import 'package:honset_app/features/courts/data/repositories/court_repository_im
 import 'package:honset_app/features/courts/domain/repositories/court_repository.dart';
 import 'package:honset_app/features/courts/presentation/cubit/courts_cubit.dart';
 import 'package:honset_app/features/profile/presentation/cubit/theme_cubit.dart';
+import 'package:honset_app/core/locale/locale_cubit.dart';
 import 'package:honset_app/shared/repositories/notification_repository.dart';
 import 'package:honset_app/shared/cubit/notifications_cubit.dart';
 import 'package:honset_app/shared/data/firestore_settings_data_source.dart';
@@ -94,4 +95,5 @@ Future<void> configureDependencies() async {
   getIt.registerFactory(() => NotificationsCubit(getIt<NotificationRepository>()));
   getIt.registerFactory(() => SettingsCubit(getIt<FirestoreSettingsDataSource>()));
   getIt.registerLazySingleton(ThemeCubit.new);
+  getIt.registerLazySingleton(() => LocaleCubit()..loadSavedLanguage());
 }

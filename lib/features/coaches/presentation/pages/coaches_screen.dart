@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:honset_app/config/router/app_router.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
@@ -28,10 +29,10 @@ class _CoachesScreenState extends State<CoachesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Coaches'),
+        title: Text(AppLocalizations.of(context)!.coaches),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: AppLocalizations.of(context)!.refresh,
             onPressed: () => context.read<CoachesCubit>().watchCoaches(),
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -46,15 +47,15 @@ class _CoachesScreenState extends State<CoachesScreen> {
           if (state.status == CoachesStatus.failure) {
             return EmptyState(
               icon: Icons.sports_tennis_rounded,
-              title: 'Coaches unavailable',
-              message: state.message ?? 'We could not load the academy coaches.',
+              title: AppLocalizations.of(context)!.coachesUnavailable,
+              message: state.message ?? AppLocalizations.of(context)!.couldNotLoadCoaches,
             );
           }
           if (state.coaches.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.people_alt_rounded,
-              title: 'No coaches found',
-              message: 'The academy has no active coaches right now.',
+              title: AppLocalizations.of(context)!.noCoachesFound,
+              message: AppLocalizations.of(context)!.noActiveCoaches,
             );
           }
           return LayoutBuilder(
@@ -193,7 +194,7 @@ class _CoachCard extends StatelessWidget {
                     children: [
                       _MetaChip(
                         icon: Icons.timer_outlined,
-                        label: '${coach.yearsExperience} yrs',
+                        label: AppLocalizations.of(context)!.yearsShort(coach.yearsExperience),
                       ),
                       const SizedBox(width: 6),
                       _MetaChip(
@@ -217,9 +218,9 @@ class _CoachCard extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      child: const FittedBox(
+                      child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text('View profile'),
+                        child: Text(AppLocalizations.of(context)!.viewProfile),
                       ),
                     ),
                   ),
@@ -259,7 +260,7 @@ class _AvailabilityPill extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              isActive ? 'Available' : 'Unavailable',
+              isActive ? AppLocalizations.of(context)!.available : AppLocalizations.of(context)!.unavailable,
               style: TextStyle(
                 color: color,
                 fontWeight: FontWeight.w700,

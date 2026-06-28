@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:honset_app/shared/cubit/notifications_cubit.dart';
 import 'package:intl/intl.dart';
 
@@ -8,9 +9,10 @@ class NotificationsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(l10n.notifications),
       ),
       body: BlocBuilder<NotificationsCubit, NotificationsState>(
         builder: (context, state) {
@@ -18,7 +20,7 @@ class NotificationsPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (state.notifications.isEmpty) {
-            return const Center(child: Text('No notifications yet.'));
+            return Center(child: Text(l10n.noNotificationsYet));
           }
           return ListView.separated(
             itemCount: state.notifications.length,

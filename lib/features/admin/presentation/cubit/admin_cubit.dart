@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:intl/intl.dart';
 
+import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:honset_app/core/utils/date_time_extensions.dart';
 import 'package:honset_app/features/admin/presentation/cubit/admin_state.dart';
@@ -70,7 +71,9 @@ class AdminCubit extends Cubit<AdminState> {
   Future<void> confirmBooking(String bookingId) async {
     try {
       await _bookingRepository.confirmBooking(bookingId);
-      final booking = state.bookings.firstWhere((b) => b.id == bookingId);
+      final booking = state.bookings.firstWhereOrNull((b) => b.id == bookingId);
+      if (booking == null) return;
+
       if (booking.bookedByUserId != null) {
         await _notificationRepository.sendNotification(
           receiverId: booking.bookedByUserId!,
@@ -90,7 +93,9 @@ class AdminCubit extends Cubit<AdminState> {
   Future<void> rejectBooking(String bookingId) async {
     try {
       await _bookingRepository.rejectBooking(bookingId);
-      final booking = state.bookings.firstWhere((b) => b.id == bookingId);
+      final booking = state.bookings.firstWhereOrNull((b) => b.id == bookingId);
+      if (booking == null) return;
+
       if (booking.bookedByUserId != null) {
         await _notificationRepository.sendNotification(
           receiverId: booking.bookedByUserId!,

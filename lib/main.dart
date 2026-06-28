@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:honset_app/config/router/app_router.dart';
 import 'package:honset_app/config/theme/app_theme.dart';
 import 'package:honset_app/core/constants/app_constants.dart';
@@ -14,6 +16,12 @@ import 'package:honset_app/features/courts/presentation/cubit/courts_cubit.dart'
 import 'package:honset_app/features/profile/presentation/cubit/theme_cubit.dart';
 import 'package:honset_app/shared/cubit/notifications_cubit.dart';
 import 'package:honset_app/shared/cubit/settings_cubit.dart';
+import 'package:honset_app/core/locale/locale_cubit.dart';
+import 'package:honset_app/core/locale/locale_state.dart';
+
+
+/// flutter build apk --split-per-abi ///
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +70,7 @@ class _HonsetAppState extends State<HonsetApp> {
         BlocProvider(create: (_) => getIt<NotificationsCubit>()),
         BlocProvider(create: (_) => getIt<SettingsCubit>()),
         BlocProvider<ThemeCubit>.value(value: _themeCubit),
+        BlocProvider(create: (_) => getIt<LocaleCubit>()),
       ],
       child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
@@ -71,13 +80,25 @@ class _HonsetAppState extends State<HonsetApp> {
         },
         child: BlocBuilder<ThemeCubit, ThemeMode>(
           builder: (context, themeMode) {
-            return MaterialApp.router(
-              title: AppConstants.appName,
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.light(),
-              darkTheme: AppTheme.dark(),
-              themeMode: themeMode,
-              routerConfig: _appRouter.router,
+            return BlocBuilder<LocaleCubit, LocaleState>(
+              builder: (context, localeState) {
+                return MaterialApp.router(
+                  title: AppConstants.appName,
+                  debugShowCheckedModeBanner: false,
+                  theme: AppTheme.light(),
+                  darkTheme: AppTheme.dark(),
+                  themeMode: themeMode,
+                  locale: localeState.locale,
+                  localizationsDelegates: const [
+                    AppLocalizations.delegate,
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  routerConfig: _appRouter.router,
+                );
+              },
             );
           },
         ),

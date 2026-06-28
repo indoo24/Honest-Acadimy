@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
 import 'package:honset_app/features/auth/presentation/cubit/auth_cubit.dart';
@@ -27,13 +28,14 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         if (!context.mounted) return;
         if (state.status == AuthStatus.authenticated) context.go('/home');
         if (state.status == AuthStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message ?? 'Login failed')),
+            SnackBar(content: Text(state.message ?? l10n.loginFailed)),
           );
         }
       },
@@ -67,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
                                 const Center(child: AppLogo(size: 64)),
                               if (!isWide) const SizedBox(height: 32),
                               Text(
-                                'Welcome back',
+                                l10n.welcomeBack,
                                 style: Theme.of(context)
                                     .textTheme
                                     .headlineMedium
@@ -75,30 +77,30 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Reserve courts, manage sessions, and keep every rally on schedule.',
+                                l10n.loginSubtitle,
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
                               const SizedBox(height: 28),
                               TextField(
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
-                                decoration: const InputDecoration(
-                                  labelText: 'Email',
-                                  prefixIcon: Icon(Icons.mail_outline_rounded),
+                                decoration: InputDecoration(
+                                  labelText: l10n.email,
+                                  prefixIcon: const Icon(Icons.mail_outline_rounded),
                                 ),
                               ),
                               const SizedBox(height: 14),
                               TextField(
                                 controller: _passwordController,
                                 obscureText: true,
-                                decoration: const InputDecoration(
-                                  labelText: 'Password',
-                                  prefixIcon: Icon(Icons.lock_outline_rounded),
+                                decoration: InputDecoration(
+                                  labelText: l10n.password,
+                                  prefixIcon: const Icon(Icons.lock_outline_rounded),
                                 ),
                               ),
                               const SizedBox(height: 22),
                               PrimaryButton(
-                                label: 'Sign in',
+                                label: l10n.signIn,
                                 icon: Icons.login_rounded,
                                 isLoading: isLoading,
                                 onPressed: () =>
@@ -115,13 +117,13 @@ class _LoginPageState extends State<LoginPage> {
                                           .read<AuthCubit>()
                                           .continueAsGuest(),
                                 icon: const Icon(Icons.person_outline_rounded),
-                                label: const Text('Continue as guest'),
+                                label: Text(l10n.continueAsGuest),
                               ),
                               const SizedBox(height: 18),
                               TextButton(
                                 onPressed: () => context.go('/register'),
-                                child: const Text(
-                                  'Create a membership account',
+                                child: Text(
+                                  l10n.createMembershipAccount,
                                 ),
                               ),
                             ],
@@ -143,6 +145,7 @@ class _LoginPageState extends State<LoginPage> {
 class _AuthHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(48),
       child: Column(
@@ -151,7 +154,7 @@ class _AuthHero extends StatelessWidget {
           const AppLogo(size: 72, foregroundColor: Colors.white),
           const Spacer(),
           Text(
-            'Premium court access with live availability.',
+            l10n.heroTitle,
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w900,
@@ -159,7 +162,7 @@ class _AuthHero extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Two championship courts, coach-led sessions, QR check-in, and admin operations in one focused product.',
+            l10n.heroSubtitle,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Colors.white.withValues(alpha: .78),
               height: 1.45,

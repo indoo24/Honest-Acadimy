@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:honset_app/config/router/app_router.dart';
 import 'package:honset_app/core/utils/date_time_extensions.dart';
@@ -17,15 +18,15 @@ class BookingDetailsPage extends StatelessWidget {
     if (flow == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: const EmptyState(
+        body: EmptyState(
           icon: Icons.event_busy_rounded,
-          title: 'Select a slot first',
-          message: 'Choose an available slot from the court dashboard.',
+          title: AppLocalizations.of(context)!.selectSlotFirst,
+          message: AppLocalizations.of(context)!.chooseAvailableSlot,
         ),
       );
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('Booking details')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.bookingDetails)),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -41,23 +42,23 @@ class BookingDetailsPage extends StatelessWidget {
           const SizedBox(height: 20),
           _DetailTile(
             icon: Icons.calendar_today_rounded,
-            title: 'Date',
+            title: AppLocalizations.of(context)!.date,
             value: flow.slot.startsAt.readableDate,
           ),
           _DetailTile(
             icon: Icons.schedule_rounded,
-            title: 'Time',
+            title: AppLocalizations.of(context)!.time,
             value:
                 '${flow.slot.startsAt.timeLabel} - ${flow.slot.endsAt.timeLabel}',
           ),
           _DetailTile(
             icon: Icons.sports_rounded,
-            title: 'Coach',
-            value: flow.slot.coachName ?? 'Select during booking',
+            title: AppLocalizations.of(context)!.coach,
+            value: flow.slot.coachName ?? AppLocalizations.of(context)!.selectDuringBooking,
           ),
           _DetailTile(
             icon: Icons.payments_rounded,
-            title: 'Court fee',
+            title: AppLocalizations.of(context)!.courtFee,
             value: '${flow.court.pricePerHour.toStringAsFixed(0)}LE',
           ),
           const SizedBox(height: 12),
@@ -67,7 +68,7 @@ class BookingDetailsPage extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           PrimaryButton(
-            label: 'Continue to coach selection',
+            label: AppLocalizations.of(context)!.continueToCoachSelection,
             icon: Icons.arrow_forward_rounded,
             onPressed: flow.slot.canBook
                 ? () => context.push(

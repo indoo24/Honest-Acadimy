@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:honset_app/l10n/app_localizations.dart';
 import 'package:honset_app/config/theme/app_colors.dart';
 import 'package:honset_app/features/booking/domain/entities/booking.dart';
 import 'package:honset_app/features/booking/domain/entities/booking_slot.dart';
@@ -23,7 +24,7 @@ class StatusBadge extends StatelessWidget {
         border: Border.all(color: color.withValues(alpha: 0.24)),
       ),
       child: Text(
-        _label,
+        _label(context),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: color,
               fontWeight: FontWeight.w800,
@@ -32,18 +33,19 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  String get _label {
+  String _label(BuildContext context) {
     if (slotStatus != null) return slotStatus!.name.toUpperCase();
-    return _bookingLabel;
+    return _bookingLabel(context);
   }
 
-  String get _bookingLabel {
+  String _bookingLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return switch (bookingStatus!) {
-      BookingStatus.pendingPayment => 'PENDING PAYMENT',
-      BookingStatus.pendingPaymentReview => 'PAYMENT REVIEW',
-      BookingStatus.confirmed => 'CONFIRMED',
-      BookingStatus.rejected => 'REJECTED',
-      BookingStatus.cancelled => 'CANCELLED',
+      BookingStatus.pendingPayment => l10n.pendingPaymentBadge,
+      BookingStatus.pendingPaymentReview => l10n.paymentReviewBadge,
+      BookingStatus.confirmed => l10n.confirmedBadge,
+      BookingStatus.rejected => l10n.rejectedBadge,
+      BookingStatus.cancelled => l10n.cancelledBadge,
     };
   }
 
