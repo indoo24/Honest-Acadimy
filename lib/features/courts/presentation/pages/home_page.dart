@@ -307,7 +307,7 @@ class _CourtCard extends StatelessWidget {
                           vertical: 8,
                         ),
                         child: Text(
-                          AppLocalizations.of(context)!.pricePerHour(court.pricePerHour.toStringAsFixed(0)),
+                          "${court.pricePerHour.toStringAsFixed(0)} جنيه",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,

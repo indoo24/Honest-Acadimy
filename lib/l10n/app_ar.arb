@@ -63,6 +63,7 @@
   "coach": "المدرب",
   "invalidCoachSelection": "اختيار مدرب غير صالح. يرجى الاختيار مرة أخرى.",
   "coachSelectionMismatch": "عدم تطابق في اختيار المدرب. يرجى الاختيار مرة أخرى.",
+  "noCoach": "بدون كابتن",
 
   "noBookingSelected": "لم يتم اختيار حجز",
   "returnToDashboardSlot": "ارجع إلى لوحة التحكم واختر فترة.",
@@ -190,5 +191,7 @@
   "pending": "معلق",
   "language": "اللغة",
   "arabic": "العربية",
-  "english": "الإنجليزية"
+  "english": "الإنجليزية",
+  "clientName": "إسم العميل",
+  "clientNameRequired": "من فضلك أدخل إسمك"
 }

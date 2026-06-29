@@ -187,6 +187,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Coach selection mismatch. Please choose again.';
 
   @override
+  String get noCoach => 'No Coach';
+
+  @override
   String get noBookingSelected => 'No booking selected';
 
   @override
@@ -544,4 +547,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get english => 'English';
+
+  @override
+  String get clientName => 'Client Name';
+
+  @override
+  String get clientNameRequired => 'Please enter your name';
 }

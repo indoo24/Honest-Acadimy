@@ -146,7 +146,7 @@ class _CourtDetailsView extends StatelessWidget {
                               ),
                             const SizedBox(height: 8),
                             Text(
-                              '\$${court.pricePerHour.toStringAsFixed(0)} / hour',
+                              '${court.pricePerHour.toStringAsFixed(0)} جنيه',
                               style: Theme.of(context)
                                   .textTheme
                                   .titleMedium
@@ -540,7 +540,7 @@ class _PriceSummary extends StatelessWidget {
             children: [
               Text(AppLocalizations.of(context)!.rate, style: Theme.of(context).textTheme.bodyMedium),
               Text(
-                '\$${pricePerHour.toStringAsFixed(0)} / hour',
+                '${pricePerHour.toStringAsFixed(0)} جنيه',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
@@ -556,7 +556,7 @@ class _PriceSummary extends StatelessWidget {
                     ),
               ),
               Text(
-                '\$${totalPrice.toStringAsFixed(2)}',
+                '${totalPrice.toStringAsFixed(0)} جنيه',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                       color: AppColors.squashGreen,
@@ -595,8 +595,26 @@ class _BookingSheetState extends State<_BookingSheet> {
   String? _selectedCoachId;
   CoachProfile? _selectedCoach;
 
-  CoachProfile? _findCoachById(List<CoachProfile> coaches, String? coachId) {
+  CoachProfile _getNoCoachProfile(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final name = locale == 'ar' ? 'بدون كابتن' : 'No Coach';
+    return CoachProfile(
+      id: 'no_coach',
+      name: name,
+      specialty: '',
+      yearsExperience: 0,
+      bio: '',
+      rating: 0.0,
+      isActive: true,
+      availableSlots: const [],
+      assignedCourts: const [],
+      weeklyAvailability: const {},
+    );
+  }
+
+  CoachProfile? _findCoachById(List<CoachProfile> coaches, String? coachId, BuildContext context) {
     if (coachId == null) return null;
+    if (coachId == 'no_coach') return _getNoCoachProfile(context);
     for (final coach in coaches) {
       if (coach.id == coachId) return coach;
     }
@@ -670,7 +688,7 @@ class _BookingSheetState extends State<_BookingSheet> {
               ),
               const SizedBox(height: 6),
               Text(
-                'Total: ${widget.totalPrice.toStringAsFixed(2)}LE',
+                'Total: ${widget.totalPrice.toStringAsFixed(0)}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: AppColors.squashGreen,
@@ -680,9 +698,13 @@ class _BookingSheetState extends State<_BookingSheet> {
               BlocBuilder<CoachesCubit, CoachesState>(
                 builder: (context, state) {
                   final coaches = state.coaches;
+                  final dropdownCoaches = [
+                    _getNoCoachProfile(context),
+                    ...coaches,
+                  ];
                   final selectedCoach = _selectedCoach == null
                       ? null
-                      : _findCoachById(coaches, _selectedCoach!.id);
+                      : _findCoachById(coaches, _selectedCoach!.id, context);
                   if (_selectedCoachId != null && selectedCoach == null) {
                     _reportInvalidCoachSelection(
                       selectedCoachId: _selectedCoachId,
@@ -704,7 +726,7 @@ class _BookingSheetState extends State<_BookingSheet> {
                           prefixIcon: const Icon(Icons.sports_rounded),
                         ),
                         items: [
-                          for (final coach in coaches)
+                          for (final coach in dropdownCoaches)
                             DropdownMenuItem(
                               value: coach.id,
                               child: Row(
@@ -712,13 +734,18 @@ class _BookingSheetState extends State<_BookingSheet> {
                                 children: [
                                   CircleAvatar(
                                     radius: 14,
+                                    backgroundColor: coach.id == 'no_coach'
+                                        ? AppColors.squashGreen.withValues(alpha: 0.2)
+                                        : null,
                                     backgroundImage:
                                         coach.imageUrl?.isNotEmpty == true
                                             ? NetworkImage(coach.imageUrl!)
                                             : null,
-                                    child: coach.imageUrl?.isNotEmpty == true
-                                        ? null
-                                        : const Icon(Icons.person, size: 14),
+                                    child: coach.id == 'no_coach'
+                                        ? const Icon(Icons.person_off, size: 14, color: AppColors.squashGreen)
+                                        : coach.imageUrl?.isNotEmpty == true
+                                            ? null
+                                            : const Icon(Icons.person, size: 14),
                                   ),
                                   const SizedBox(width: 10),
                                   Flexible(
@@ -729,14 +756,16 @@ class _BookingSheetState extends State<_BookingSheet> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${coach.yearsExperience}y',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall
-                                        ?.copyWith(fontWeight: FontWeight.w700),
-                                  ),
+                                  if (coach.id != 'no_coach') ...[
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${coach.yearsExperience}y',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(fontWeight: FontWeight.w700),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
@@ -744,7 +773,7 @@ class _BookingSheetState extends State<_BookingSheet> {
                         onChanged: state.status == CoachesStatus.loading
                             ? null
                             : (value) {
-                                final match = _findCoachById(coaches, value);
+                                final match = _findCoachById(coaches, value, context);
                                 if (match == null) {
                                   _reportInvalidCoachSelection(
                                     selectedCoachId: value,

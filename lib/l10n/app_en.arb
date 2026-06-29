@@ -84,6 +84,7 @@
   "coach": "Coach",
   "invalidCoachSelection": "Invalid coach selection. Please choose again.",
   "coachSelectionMismatch": "Coach selection mismatch. Please choose again.",
+  "noCoach": "No Coach",
 
   "noBookingSelected": "No booking selected",
   "returnToDashboardSlot": "Return to the dashboard and choose a slot.",
@@ -259,5 +260,7 @@
   "pending": "Pending",
   "language": "Language",
   "arabic": "Arabic",
-  "english": "English"
+  "english": "English",
+  "clientName": "Client Name",
+  "clientNameRequired": "Please enter your name"
 }

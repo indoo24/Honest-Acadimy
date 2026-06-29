@@ -38,8 +38,8 @@ class BookingCubit extends Cubit<BookingState> {
 
       if (booking.status == BookingStatus.pendingPayment || booking.status == BookingStatus.pendingPaymentReview) {
         await _notificationRepository.notifyAdmins(
-          title: 'New Pending Booking! 🎾',
-          body: 'Coach ${booking.coachName} requested ${booking.courtName} on ${booking.startsAt.readableDate}.',
+          title: 'طلب حجز جديد! 🎾',
+          body: 'طلب  ${booking.coachName} حجز ${booking.courtName} في تاريخ ${booking.startsAt.readableDate}.',
           bookingId: booking.id,
         );
       }
@@ -89,8 +89,8 @@ class BookingCubit extends Cubit<BookingState> {
       await _repository.cancelBooking(bookingId);
 
       await _notificationRepository.notifyAdmins(
-        title: 'Booking Cancelled ❌',
-        body: 'Coach $coachName has cancelled their booking.',
+        title: 'تم إلغاء الحجز ❌',
+        body: 'قام $coachName بإلغاء حجزه.',
         bookingId: bookingId,
       );
 
@@ -146,8 +146,8 @@ class BookingCubit extends Cubit<BookingState> {
       await _repository.rescheduleBooking(bookingId, newStart, newEnd);
 
       await _notificationRepository.notifyAdmins(
-        title: 'Booking Rescheduled 📅',
-        body: 'Coach $coachName requested a time change for their booking.',
+        title: 'تم تعديل موعد الحجز 📅',
+        body: 'طلب  $coachName تغيير وقت حجزه.',
         bookingId: bookingId,
       );
 

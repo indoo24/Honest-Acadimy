@@ -23,9 +23,16 @@ class BookingConfirmationPage extends StatefulWidget {
       _BookingConfirmationPageState();
 }
 
+/// Sentinel value used when the user opts out of coach selection.
+const _kNoCoachId = 'no_coach';
+
 class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   String? _selectedCoachId;
   String _selectedPaymentMethod = 'cash';
+  final TextEditingController _clientNameController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  bool get _isNoCoach => _selectedCoachId == _kNoCoachId;
 
   CoachProfile? _findCoachById(List<CoachProfile> coaches, String? coachId) {
     if (coachId == null) return null;
@@ -59,6 +66,12 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   }
 
   @override
+  void dispose() {
+    _clientNameController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final flow = widget.args;
     final authUser = context.read<AuthCubit>().state.user;
@@ -88,7 +101,9 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(title: Text(AppLocalizations.of(context)!.confirmBookingTitle)),
-          body: ListView(
+          body: Form(
+            key: _formKey,
+            child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
               Card(
@@ -112,7 +127,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       _SummaryRow(
                         label: AppLocalizations.of(context)!.total,
                         value:
-                            '${flow.court.pricePerHour.toStringAsFixed(0)}LE',
+                            '${flow.court.pricePerHour.toStringAsFixed(0)}جنيه ',
                       ),
                     ],
                   ),
@@ -121,11 +136,15 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
               const SizedBox(height: 16),
               BlocBuilder<CoachesCubit, CoachesState>(
                 builder: (context, state) {
+                  final l10n = AppLocalizations.of(context)!;
                   final selectedCoach = _findCoachById(
                     state.coaches,
                     _selectedCoachId,
                   );
-                  if (_selectedCoachId != null && selectedCoach == null) {
+                  // Skip validation for the "No Coach" sentinel.
+                  if (_selectedCoachId != null &&
+                      !_isNoCoach &&
+                      selectedCoach == null) {
                     _reportInvalidCoachSelection(
                       selectedCoachId: _selectedCoachId,
                       coaches: state.coaches,
@@ -137,17 +156,43 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                         key: ValueKey(
                           'coach-dropdown-${_selectedCoachId ?? 'none'}-${state.coaches.length}',
                         ),
-                        initialValue: selectedCoach?.id,
+                        initialValue: _isNoCoach
+                            ? _kNoCoachId
+                            : selectedCoach?.id,
 
                         // 👈 السطر ده أساسي عشان يخلي النص والأيقونة يلتزموا بالـ 180 بكسل
                         isExpanded: true,
 
                         decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.coach,
+                          labelText: l10n.coach,
                           prefixIcon: const Icon(Icons.sports_rounded),
                         ),
-                        // باقي الكود بتاعك (items, onChanged...) زي ما هو تحت الديكوراسيون
                     items: [
+                      // ── "No Coach" option ──
+                      DropdownMenuItem(
+                        value: _kNoCoachId,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircleAvatar(
+                              radius: 14,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.surfaceContainerHighest,
+                              child: const Icon(Icons.person_off_rounded, size: 14),
+                            ),
+                            const SizedBox(width: 10),
+                            Flexible(
+                              fit: FlexFit.loose,
+                              child: Text(
+                                l10n.noCoach,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // ── Real coaches ──
                       for (final coach in state.coaches)
                         DropdownMenuItem(
                           value: coach.id,
@@ -187,6 +232,12 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                     onChanged: state.status == CoachesStatus.loading
                         ? null
                         : (value) {
+                            // Handle "No Coach" selection.
+                            if (value == _kNoCoachId) {
+                              debugPrint('[COACH SELECTED] No Coach');
+                              setState(() => _selectedCoachId = _kNoCoachId);
+                              return;
+                            }
                             final match = _findCoachById(state.coaches, value);
                             if (match == null) {
                               _reportInvalidCoachSelection(
@@ -208,6 +259,45 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                   ));
                 },
               ),
+              // ── Client Name field (visible only when "No Coach" is selected) ──
+              if (_isNoCoach) ...[
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _clientNameController,
+                  style: const TextStyle(color: Color(0xFF0A84FF)),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.clientName,
+                    labelStyle: const TextStyle(color: Color(0xFF0A84FF)),
+                    hintText: AppLocalizations.of(context)!.clientName,
+                    hintStyle: TextStyle(color: const Color(0xFF0A84FF).withOpacity(0.5)),
+                    prefixIcon: const Icon(Icons.person_outline_rounded, color: Color(0xFF0A84FF)),
+                    filled: true,
+                    fillColor: const Color(0xFF161B26),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF0A84FF), width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF0A84FF), width: 2),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.redAccent, width: 2),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return AppLocalizations.of(context)!.clientNameRequired;
+                    }
+                    return null;
+                  },
+                ),
+              ],
               const SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.paymentMethod,
@@ -246,63 +336,82 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                 onPressed: _selectedCoachId == null
                     ? null
                     : () {
-                        final coachesState = context.read<CoachesCubit>().state;
-                        final selectedCoach = _findCoachById(
-                          coachesState.coaches,
-                          _selectedCoachId,
-                        );
-                        if (selectedCoach == null) {
-                          _reportInvalidCoachSelection(
-                            selectedCoachId: _selectedCoachId,
-                            coaches: coachesState.coaches,
+                        // Validate form (includes client name when No Coach).
+                        if (!_formKey.currentState!.validate()) return;
+
+                        final l10n = AppLocalizations.of(context)!;
+
+                        // Resolve coachId / coachName.
+                        final String resolvedCoachId;
+                        final String resolvedCoachName;
+
+                        if (_isNoCoach) {
+                          resolvedCoachId = _kNoCoachId;
+                          resolvedCoachName = _clientNameController.text.trim();
+                          debugPrint('[BOOKING CREATED] No Coach selected – client name: $resolvedCoachName');
+                        } else {
+                          final coachesState =
+                              context.read<CoachesCubit>().state;
+                          final selectedCoach = _findCoachById(
+                            coachesState.coaches,
+                            _selectedCoachId,
                           );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                               content: Text(
-                                'Invalid coach selection. Please choose again.',
+                          if (selectedCoach == null) {
+                            _reportInvalidCoachSelection(
+                              selectedCoachId: _selectedCoachId,
+                              coaches: coachesState.coaches,
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.invalidCoachSelection),
                               ),
-                            ),
-                          );
-                          return;
-                        }
-                        if (selectedCoach.id != _selectedCoachId) {
-                          _reportInvalidCoachSelection(
-                            selectedCoachId: _selectedCoachId,
-                            coaches: coachesState.coaches,
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                               content: Text(
-                                'Coach selection mismatch. Please choose again.',
+                            );
+                            return;
+                          }
+                          if (selectedCoach.id != _selectedCoachId) {
+                            _reportInvalidCoachSelection(
+                              selectedCoachId: _selectedCoachId,
+                              coaches: coachesState.coaches,
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.coachSelectionMismatch),
                               ),
-                            ),
+                            );
+                            return;
+                          }
+                          resolvedCoachId = selectedCoach.id;
+                          resolvedCoachName = selectedCoach.name;
+                          debugPrint(
+                            'BOOKING COACH ID: ${selectedCoach.id}',
                           );
-                          return;
+                          debugPrint(
+                            'BOOKING COACH NAME: ${selectedCoach.name}',
+                          );
+                          debugPrint(
+                            '[COACH SELECTED]\nid=${selectedCoach.id}\nname=${selectedCoach.name}',
+                          );
+                          debugPrint(
+                            '[BOOKING CREATED]\ncoachId=${selectedCoach.id}\ncoachName=${selectedCoach.name}',
+                          );
                         }
-                        debugPrint('BOOKING COACH ID: ${selectedCoach.id}');
-                        debugPrint('BOOKING COACH NAME: ${selectedCoach.name}');
-                        debugPrint(
-                          '[COACH SELECTED]\nid=${selectedCoach.id}\nname=${selectedCoach.name}',
-                        );
-                        debugPrint(
-                          '[BOOKING CREATED]\ncoachId=${selectedCoach.id}\ncoachName=${selectedCoach.name}',
-                        );
+
                         if (_selectedPaymentMethod == 'instapay') {
                           context.push(
                             '/booking/payment',
                             extra: BookingPaymentArgs(
                               court: flow.court,
                               slot: flow.slot,
-                              coachId: selectedCoach.id,
-                              coachName: selectedCoach.name,
+                              coachId: resolvedCoachId,
+                              coachName: resolvedCoachName,
                             ),
                           );
                           return;
                         }
                         debugPrint('[RESERVE CALLED]\nmethod=cash');
                         context.read<BookingCubit>().reserve(
-                          coachId: selectedCoach.id,
-                          coachName: selectedCoach.name,
+                          coachId: resolvedCoachId,
+                          coachName: resolvedCoachName,
                           court: flow.court,
                           slot: flow.slot,
                           bookedByUserId: authUser?.id,
@@ -311,6 +420,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       },
               ),
             ],
+          ),
           ),
         );
       },

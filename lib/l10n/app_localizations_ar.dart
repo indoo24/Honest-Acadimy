@@ -187,6 +187,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'عدم تطابق في اختيار المدرب. يرجى الاختيار مرة أخرى.';
 
   @override
+  String get noCoach => 'بدون كابتن';
+
+  @override
   String get noBookingSelected => 'لم يتم اختيار حجز';
 
   @override
@@ -540,4 +543,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get english => 'الإنجليزية';
+
+  @override
+  String get clientName => 'إسم العميل';
+
+  @override
+  String get clientNameRequired => 'من فضلك أدخل إسمك';
 }

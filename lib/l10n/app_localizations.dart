@@ -428,6 +428,12 @@ abstract class AppLocalizations {
   /// **'Coach selection mismatch. Please choose again.'**
   String get coachSelectionMismatch;
 
+  /// No description provided for @noCoach.
+  ///
+  /// In en, this message translates to:
+  /// **'No Coach'**
+  String get noCoach;
+
   /// No description provided for @noBookingSelected.
   ///
   /// In en, this message translates to:
@@ -1099,6 +1105,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'English'**
   String get english;
+
+  /// No description provided for @clientName.
+  ///
+  /// In en, this message translates to:
+  /// **'Client Name'**
+  String get clientName;
+
+  /// No description provided for @clientNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your name'**
+  String get clientNameRequired;
 }
 
 class _AppLocalizationsDelegate

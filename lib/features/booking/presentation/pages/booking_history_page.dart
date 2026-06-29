@@ -323,7 +323,7 @@ class _RescheduleSheetState extends State<_RescheduleSheet> {
         id: widget.booking.courtId,
         name: widget.booking.courtName,
         isActive: true,
-        pricePerHour: widget.booking.amount / 0.75, // reverse from 45-min price
+        pricePerHour: widget.booking.amount, // reverse from 45-min price
       ),
       selectedDate: dateOnly,
       bookingDataSource: getIt<FirestoreBookingDataSource>(),

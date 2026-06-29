@@ -54,7 +54,7 @@ class CourtDetailsState extends Equatable {
   double get totalPrice {
     if (selectedSlot == null) return 0;
     // 45 minutes = 0.75 hours
-    return court.pricePerHour * 0.75;
+    return court.pricePerHour ;
   }
 
   CourtDetailsState copyWith({
